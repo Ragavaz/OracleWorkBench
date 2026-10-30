@@ -1,0 +1,6 @@
+node_modules/
+.vantage-workbench/
+*.key
+.taste-skill/
+.env
+*.log

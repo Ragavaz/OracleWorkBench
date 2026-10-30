@@ -1,0 +1,888 @@
+<title>Vantage Oracle Workbench</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: a workbench — fixed tool rail on the left, one working surface on the right; collapses to a scrolling chip rail on phones. */
+:root{
+  --paper:#F3F6F5; --panel:#FFFFFF; --sunk:#E9EEED; --ink:#13201F; --muted:#56696A; --line:#D5DEDC;
+  --accent:#0E6B66; --accent-soft:#D7EBE8; --accent-ink:#FFFFFF; --signal:#B4680F; --signal-soft:#F6E7D3;
+  --ok:#1E7B46; --warn:#A45A00; --bad:#B3261E;
+  --code-bg:#0F1B1C; --code-ink:#D9E7E4; --code-dim:#7F9895; --code-key:#7FD3C8; --code-str:#F2C077;
+  --f-ui:"Schibsted Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0B1213; --panel:#111B1C; --sunk:#0E1718; --ink:#E2ECEA; --muted:#8EA3A1; --line:#22312F;
+  --accent:#4DBFB4; --accent-soft:#143532; --accent-ink:#04201D; --signal:#E9A24C; --signal-soft:#33240F;
+  --ok:#5BC489; --warn:#E9A24C; --bad:#F2867E;
+  --code-bg:#070D0E; --code-ink:#D9E7E4; --code-dim:#6F8784; --code-key:#7FD3C8; --code-str:#F2C077;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0B1213; --panel:#111B1C; --sunk:#0E1718; --ink:#E2ECEA; --muted:#8EA3A1; --line:#22312F;
+  --accent:#4DBFB4; --accent-soft:#143532; --accent-ink:#04201D; --signal:#E9A24C; --signal-soft:#33240F;
+  --ok:#5BC489; --warn:#E9A24C; --bad:#F2867E;
+  --code-bg:#070D0E; --code-ink:#D9E7E4; --code-dim:#6F8784; --code-key:#7FD3C8; --code-str:#F2C077;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--paper);color:var(--ink)}
+body{font-family:var(--f-ui);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.15}
+code,pre,.mono{font-family:var(--f-mono)}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--panel);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;
+  display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em;font-size:17px;text-decoration:none;color:var(--ink)}
+.mark{width:28px;height:28px;border-radius:6px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-family:var(--f-mono);font-size:13px;font-weight:600}
+.brand small{font-weight:500;color:var(--muted);font-size:13px}
+.top .spacer{flex:1}
+.pill{font-family:var(--f-mono);font-size:11.5px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.live{border-color:var(--accent);color:var(--accent)}
+
+/* shell */
+.shell{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:calc(100vh - 52px)}
+.rail{border-right:1px solid var(--line);background:var(--panel);padding:18px 12px;position:sticky;top:52px;align-self:start;height:calc(100vh - 52px);overflow:auto}
+.rail h4{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:16px 10px 6px;font-weight:600}
+.rail h4:first-child{margin-top:0}
+.rail a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--ink);text-decoration:none;font-weight:500}
+.rail a .k{font-family:var(--f-mono);font-size:11px;color:var(--muted);width:30px}
+.rail a:hover{background:var(--sunk)}
+.rail a[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.rail a[aria-current="page"] .k{color:var(--accent)}
+.main{min-width:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.view{max-width:1120px;margin:0 auto;display:grid;gap:22px}
+.vhead{display:grid;gap:6px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;color:var(--signal);letter-spacing:.02em}
+.vhead h1{font-size:clamp(24px,3vw,32px);letter-spacing:-.02em;font-weight:800}
+.vhead p{margin:0;color:var(--muted);max-width:68ch}
+
+/* surfaces */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0}
+.card h2{font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.grid2{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:18px;align-items:start}
+.grid2.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.field{display:grid;gap:5px;min-width:0}
+.field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.field .hint{font-size:12px;color:var(--muted)}
+input[type=text],select,textarea{width:100%;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0}
+textarea{font-family:var(--f-mono);font-size:13px;line-height:1.5;resize:vertical}
+input.mono{font-family:var(--f-mono);font-size:13px}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.stack{display:grid;gap:12px}
+.check{display:flex;gap:8px;align-items:center;font-size:13.5px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:7px 12px;font-weight:600;font-size:13.5px;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* code output */
+.tabs{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:0}
+.tab{border:0;background:none;padding:8px 12px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.code{position:relative;background:var(--code-bg);color:var(--code-ink);border-radius:var(--r);overflow:hidden}
+.code pre{margin:0;padding:38px 16px 16px;overflow-x:auto;font-size:12.8px;line-height:1.6;white-space:pre;min-height:120px}
+.code .copy{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.08);color:var(--code-ink);border:1px solid rgba(255,255,255,.14);border-radius:5px;font-size:12px;padding:4px 9px;cursor:pointer}
+.code .copy:hover{background:rgba(255,255,255,.16)}
+.tk-k{color:var(--code-key)} .tk-s{color:var(--code-str)} .tk-d{color:var(--code-dim)}
+.note{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:flex-start}
+.note b{color:var(--ink)}
+.flag{display:inline-block;font-family:var(--f-mono);font-size:11px;padding:1px 7px;border-radius:4px;background:var(--signal-soft);color:var(--signal);font-weight:600}
+.issues{display:grid;gap:6px;margin:0;padding:0;list-style:none;font-size:13px}
+.issues li{display:flex;gap:8px;align-items:baseline}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;transform:translateY(1px)}
+.dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)}
+
+/* home */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:28px;align-items:center;padding-block:8px 4px}
+.hero h1{font-size:clamp(30px,4.4vw,50px);letter-spacing:-.03em;font-weight:800;line-height:1.02}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p{color:var(--muted);font-size:16.5px;max-width:52ch;margin:14px 0 18px}
+.wire{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:16px 18px;font-family:var(--f-mono);font-size:12.5px;line-height:1.75;overflow-x:auto;min-width:0}
+.wire .ln{white-space:pre}
+.wire .lbl{color:var(--code-dim)}
+.path{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);background:var(--panel);overflow:hidden}
+.path div{padding:14px;border-right:1px solid var(--line);min-width:0}
+.path div:last-child{border-right:0}
+.path b{display:block;font-size:14px}
+.path span{font-size:12.5px;color:var(--muted)}
+.path i{font-style:normal;font-family:var(--f-mono);font-size:11px;color:var(--signal)}
+.cover{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.mod{display:grid;gap:10px;align-content:start}
+.mod .tag{font-family:var(--f-mono);font-size:12px;color:var(--accent);font-weight:600}
+.mod h3{font-size:16px}
+.mod p{margin:0;color:var(--muted);font-size:13.5px}
+.mod ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.mod li a{font-size:12.5px;padding:3px 9px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--ink);display:inline-block}
+.mod li a:hover{border-color:var(--accent);color:var(--accent)}
+.sectitle{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sectitle h2{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.sectitle span{color:var(--muted);font-size:13.5px}
+
+/* snippets */
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 11px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.snips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.snip{display:grid;gap:10px;align-content:start}
+.snip header{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
+.snip h3{font-size:15px}
+.snip .meta{font-family:var(--f-mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.snip p{margin:0;font-size:13px;color:var(--muted)}
+.snip .code pre{min-height:0;font-size:12px}
+
+/* assistant */
+.chat{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:0;min-height:560px;padding:0;overflow:hidden}
+.chat .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.log{padding:18px 16px;display:grid;gap:14px;align-content:start;overflow:auto;max-height:62vh;min-height:300px}
+.msg{max-width:80ch;min-width:0}
+.msg.me{justify-self:end;background:var(--accent-soft);border-radius:10px 10px 2px 10px;padding:10px 14px}
+.msg.ai{justify-self:start}
+.msg.ai .who{font-family:var(--f-mono);font-size:11px;color:var(--accent);margin-bottom:4px}
+.msg p{margin:0 0 8px} .msg p:last-child{margin-bottom:0}
+.msg ul,.msg ol{margin:0 0 8px;padding-left:20px}
+.msg pre{background:var(--code-bg);color:var(--code-ink);padding:12px;border-radius:6px;overflow-x:auto;font-size:12.5px;margin:0 0 8px}
+.msg code{font-size:.92em;background:var(--sunk);padding:1px 4px;border-radius:3px}
+.msg pre code{background:none;padding:0}
+.compose{border-top:1px solid var(--line);padding:12px 16px;display:grid;gap:10px}
+.compose textarea{font-family:var(--f-ui);font-size:14.5px}
+.starters{display:flex;flex-wrap:wrap;gap:6px}
+.starters button{font-size:12.5px;border:1px dashed var(--line);background:none;border-radius:6px;padding:5px 9px;cursor:pointer;color:var(--ink);text-align:left}
+.starters button:hover{border-color:var(--accent);color:var(--accent)}
+.status{font-size:12.5px;color:var(--muted)}
+.foot{max-width:1120px;margin:28px auto 0;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+
+@media (max-width:980px){
+  .grid2,.grid2.even,.hero{grid-template-columns:minmax(0,1fr)}
+  .cover{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .snips{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:760px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .rail{position:static;height:auto;display:flex;gap:4px;overflow-x:auto;padding:8px 12px;border-right:0;border-bottom:1px solid var(--line)}
+  .rail h4{display:none}
+  .rail a{white-space:nowrap;padding:6px 10px}
+  .rail a .k{display:none}
+  .path{grid-template-columns:minmax(0,1fr)}
+  .path div{border-right:0;border-bottom:1px solid var(--line)}
+  .cover{grid-template-columns:minmax(0,1fr)}
+  .top .pill.hide-sm{display:none}
+}
+@media (prefers-reduced-motion:no-preference){.btn,.chip,.rail a{transition:background .15s,border-color .15s,color .15s}}
+</style>
+
+<header class="top">
+  <a class="brand" href="#home"><span class="mark">VW</span>Vantage Workbench <small>for Oracle Cloud</small></a>
+  <span class="spacer"></span>
+  <span class="pill hide-sm">Runs in your browser · nothing sent to Oracle</span>
+  <span class="pill" id="aiPill">Assistant: checking…</span>
+</header>
+
+<div class="shell">
+  <nav class="rail" aria-label="Workspaces">
+    <h4>Start</h4>
+    <a href="#home" data-view="home"><span class="k">00</span>Overview</a>
+    <h4>Build &amp; connect</h4>
+    <a href="#rest" data-view="rest"><span class="k">REST</span>REST Studio</a>
+    <a href="#hdl" data-view="hdl"><span class="k">HDL</span>HDL Builder</a>
+    <a href="#formula" data-view="formula"><span class="k">FF</span>Fast Formula</a>
+    <h4>Reference</h4>
+    <a href="#snippets" data-view="snippets"><span class="k">LIB</span>Snippet Library</a>
+    <a href="#utils" data-view="utils"><span class="k">UTL</span>Utilities</a>
+    <h4>Assist</h4>
+    <a href="#assistant" data-view="assistant"><span class="k">AI</span>Oracle Assistant</a>
+  </nav>
+
+  <main class="main">
+    <!-- ============ HOME ============ -->
+    <section class="view" id="v-home">
+      <div class="hero">
+        <div>
+          <div class="eyebrow">HCM · ERP · OIC · OCI · VBS / VBCS</div>
+          <h1>Requirement in.<br><em>Deployable artefact</em> out.</h1>
+          <p>A consultant's bench for Oracle Cloud work: build Fusion REST calls, HDL files and Fast Formula skeletons, pull tested snippets, and ask an Oracle-aware assistant when you are stuck.</p>
+          <div class="actions">
+            <a class="btn primary" href="#rest">Open REST Studio</a>
+            <a class="btn" href="#assistant">Ask the assistant</a>
+          </div>
+        </div>
+        <div class="wire" aria-label="Example artefacts">
+          <div class="ln"><span class="lbl"># REST Studio</span></div>
+          <div class="ln"><span class="tk-k">GET</span> /hcmRestApi/resources/11.13.18.05/workers</div>
+          <div class="ln">    ?q=<span class="tk-s">PersonNumber='1001'</span>&amp;expand=names&amp;onlyData=true</div>
+          <div class="ln"><span class="lbl"># HDL Builder → Worker.dat</span></div>
+          <div class="ln"><span class="tk-k">METADATA</span>|Worker|SourceSystemOwner|SourceSystemId|PersonNumber</div>
+          <div class="ln"><span class="tk-k">MERGE</span>|Worker|<span class="tk-s">VANTAGE</span>|<span class="tk-s">EMP_1001</span>|1001</div>
+          <div class="ln"><span class="lbl"># Fast Formula</span></div>
+          <div class="ln"><span class="tk-k">DEFAULT FOR</span> PER_ASG_GRADE_NAME <span class="tk-k">IS</span> <span class="tk-s">' '</span></div>
+          <div class="ln"><span class="tk-k">RETURN</span> ELIGIBLE</div>
+        </div>
+      </div>
+
+      <div class="path" aria-label="Delivery path">
+        <div><i>1 · Describe</i><b>Capture the need</b><span>Module, object, outcome.</span></div>
+        <div><i>2 · Generate</i><b>Build the artefact</b><span>REST call, HDL, formula, SQL.</span></div>
+        <div><i>3 · Review</i><b>Check before running</b><span>Validation flags and AI review.</span></div>
+        <div><i>4 · Test</i><b>Prove it in a test pod</b><span>cURL, Postman, VBS preview.</span></div>
+        <div><i>5 · Deploy</i><b>Promote with evidence</b><span>CAB notes and rollback plan.</span></div>
+      </div>
+
+      <div class="sectitle"><h2>Coverage</h2><span>Pick a module to open the right tool with its preset loaded.</span></div>
+      <div class="cover">
+        <article class="card mod"><span class="tag">HCM</span><h3>Human Capital Management</h3><p>Workers, assignments, absences, element entries and extracts.</p>
+          <ul><li><a href="#rest" data-preset="hcm:workers">Workers REST</a></li><li><a href="#hdl" data-hdl="Worker">Worker.dat</a></li><li><a href="#hdl" data-hdl="ElementEntry">ElementEntry.dat</a></li><li><a href="#formula">Fast Formula</a></li><li><a href="#snippets" data-cat="HCM">BIP SQL</a></li></ul></article>
+        <article class="card mod"><span class="tag">ERP</span><h3>Financials &amp; Procurement</h3><p>Payables invoices, suppliers, purchase orders and FBDI imports.</p>
+          <ul><li><a href="#rest" data-preset="fscm:invoices">Invoices REST</a></li><li><a href="#rest" data-preset="fscm:suppliers">Suppliers REST</a></li><li><a href="#snippets" data-cat="ERP">FBDI via REST</a></li></ul></article>
+        <article class="card mod"><span class="tag">OIC</span><h3>Integration Cloud</h3><p>REST adapter setup, mapper functions, lookups and monitoring APIs.</p>
+          <ul><li><a href="#rest" data-preset="hcm:workers" data-out="oic">Adapter config</a></li><li><a href="#snippets" data-cat="OIC">Mapper XPath</a></li><li><a href="#utils">Base64 / JSON</a></li></ul></article>
+        <article class="card mod"><span class="tag">OCI</span><h3>Cloud Infrastructure</h3><p>Object Storage staging, pre-authenticated requests and Functions.</p>
+          <ul><li><a href="#snippets" data-cat="OCI">OCI CLI</a></li><li><a href="#assistant">Design help</a></li></ul></article>
+        <article class="card mod"><span class="tag">VBS</span><h3>Visual Builder / Redwood</h3><p>Service connections, JavaScript action chains and app-level expressions.</p>
+          <ul><li><a href="#rest" data-preset="hcm:workers" data-out="vbs">callRest chain</a></li><li><a href="#snippets" data-cat="VBS">VBS snippets</a></li></ul></article>
+        <article class="card mod"><span class="tag">REST</span><h3>Fusion REST framework</h3><p>Filters, paging, child resources, effective dating and versions.</p>
+          <ul><li><a href="#rest">Query builder</a></li><li><a href="#snippets" data-cat="REST">Paging loop</a></li></ul></article>
+      </div>
+      <p class="foot">Starter content is checked against Oracle documentation where noted, but REST resources, HDL attributes and DBIs vary by release and by your pod's configuration. Confirm in the REST API guide, View Business Objects, or the formula's DBI list before production use. Oracle, Fusion, OIC, OCI and Visual Builder are trademarks of Oracle; this workbench is an independent tool.</p>
+    </section>
+
+    <!-- ============ REST ============ -->
+    <section class="view" id="v-rest" hidden>
+      <div class="vhead"><span class="eyebrow">Connect · Fusion REST</span><h1>REST Studio</h1>
+        <p>Compose a Fusion REST request once, then take it as a URL, cURL, JavaScript, a VBS action-chain call or an OIC REST adapter checklist.</p></div>
+      <div class="grid2">
+        <div class="card stack">
+          <div class="row">
+            <div class="field"><label for="r-api">API family</label>
+              <select id="r-api"><option value="hcm">HCM — hcmRestApi</option><option value="fscm">ERP / SCM — fscmRestApi</option><option value="crm">CX — crmRestApi</option></select></div>
+            <div class="field"><label for="r-res">Resource</label><select id="r-res"></select></div>
+          </div>
+          <div class="field"><label for="r-path">Resource path</label><input id="r-path" type="text" class="mono">
+            <span class="hint">Edit for child resources, e.g. <code>workers/{id}/child/names</code>.</span></div>
+          <div class="row">
+            <div class="field"><label for="r-host">Pod host</label><input id="r-host" type="text" class="mono" value="https://{pod}.fa.{region}.oraclecloud.com"></div>
+            <div class="field"><label for="r-ver">Version</label><input id="r-ver" type="text" class="mono" value="11.13.18.05"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label for="r-method">Method</label><select id="r-method"><option>GET</option><option>POST</option><option>PATCH</option><option>DELETE</option></select></div>
+            <div class="field"><label for="r-id">Item key (optional)</label><input id="r-id" type="text" class="mono" placeholder="e.g. 300000012345678"></div>
+          </div>
+          <div class="field"><label for="r-q">q (filter)</label><input id="r-q" type="text" class="mono"><span class="hint">Framework v2+: <code>LastName='Smith' and HireDate &gt; '2026-01-01'</code></span></div>
+          <div class="row">
+            <div class="field"><label for="r-fields">fields</label><input id="r-fields" type="text" class="mono" placeholder="PersonId,PersonNumber"></div>
+            <div class="field"><label for="r-expand">expand</label><input id="r-expand" type="text" class="mono" placeholder="names,emails"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label for="r-order">orderBy</label><input id="r-order" type="text" class="mono" placeholder="PersonNumber:desc"></div>
+            <div class="field"><label for="r-finder">finder</label><input id="r-finder" type="text" class="mono" placeholder="findByX;Attr=value"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label for="r-limit">limit</label><input id="r-limit" type="text" class="mono" value="25"></div>
+            <div class="field"><label for="r-offset">offset</label><input id="r-offset" type="text" class="mono" value="0"></div>
+            <div class="field"><label for="r-fw">REST-Framework-Version</label><select id="r-fw"><option value="">(not sent)</option><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select></div>
+          </div>
+          <div class="actions">
+            <label class="check"><input type="checkbox" id="r-only" checked> onlyData=true</label>
+            <label class="check"><input type="checkbox" id="r-total"> totalResults=true</label>
+          </div>
+          <div class="field"><label for="r-eff">Effective-Of header (HCM, effective-dated writes)</label><input id="r-eff" type="text" class="mono" placeholder="RangeMode=UPDATE;RangeStartDate=2026-11-01"></div>
+          <div class="field" id="r-bodywrap"><label for="r-body">Request body (JSON)</label><textarea id="r-body" rows="7" spellcheck="false"></textarea></div>
+          <div class="field"><label for="r-conn">VBS service connection name</label><input id="r-conn" type="text" class="mono" value="hcmRestApi"></div>
+        </div>
+        <div class="stack">
+          <div class="card stack" style="padding-bottom:14px">
+            <div class="tabs" role="tablist" id="r-tabs">
+              <button class="tab" role="tab" data-out="url" aria-selected="true">URL</button>
+              <button class="tab" role="tab" data-out="curl" aria-selected="false">cURL</button>
+              <button class="tab" role="tab" data-out="js" aria-selected="false">JavaScript</button>
+              <button class="tab" role="tab" data-out="vbs" aria-selected="false">VBS action chain</button>
+              <button class="tab" role="tab" data-out="oic" aria-selected="false">OIC adapter</button>
+            </div>
+            <div class="code"><button class="copy" data-copy="r-out">Copy</button><pre id="r-out"></pre></div>
+            <ul class="issues" id="r-issues"></ul>
+            <div class="actions"><button class="btn" data-ask="rest">Ask the assistant to review this request</button></div>
+          </div>
+          <div class="note"><span class="flag">VERIFY</span><span>Resource names come from Oracle's REST API guides for HCM and Financials. Child resource names, finders and field names vary by release. Open <b>/describe</b> on the resource in your pod to confirm.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HDL ============ -->
+    <section class="view" id="v-hdl" hidden>
+      <div class="vhead"><span class="eyebrow">Load · HCM Data Loader</span><h1>HDL Builder</h1>
+        <p>Paste rows as CSV, get a pipe-delimited <code>.dat</code> with METADATA and MERGE lines, plus checks for column counts and HDL's default date format.</p></div>
+      <div class="grid2">
+        <div class="card stack">
+          <div class="row">
+            <div class="field"><label for="h-preset">Starter template</label>
+              <select id="h-preset"><option>Worker</option><option>PersonName</option><option>PersonEmail</option><option>ElementEntry</option><option>Custom</option></select></div>
+            <div class="field"><label for="h-obj">Business object / component</label><input id="h-obj" type="text" class="mono"></div>
+            <div class="field"><label for="h-action">Action</label><select id="h-action"><option>MERGE</option><option>DELETE</option></select></div>
+          </div>
+          <div class="field"><label for="h-attrs">Attributes (comma or pipe separated)</label><textarea id="h-attrs" rows="3" spellcheck="false"></textarea></div>
+          <div class="field"><label for="h-rows">Rows (CSV, one record per line, same column order)</label><textarea id="h-rows" rows="7" spellcheck="false"></textarea>
+            <span class="hint">Sample rows are examples only. Wrap a value in double quotes if it contains a comma.</span></div>
+          <div class="row">
+            <div class="field"><label for="h-sso">Default SourceSystemOwner</label><input id="h-sso" type="text" class="mono" value="VANTAGE"><span class="hint">Fills blank SourceSystemOwner cells.</span></div>
+            <div class="field"><label for="h-file">File name</label><input id="h-file" type="text" class="mono"></div>
+          </div>
+          <label class="check"><input type="checkbox" id="h-comment" checked> Add a header comment line</label>
+        </div>
+        <div class="stack">
+          <div class="card stack">
+            <h2 id="h-title">Worker.dat</h2>
+            <div class="code"><button class="copy" data-copy="h-out">Copy</button><pre id="h-out"></pre></div>
+            <ul class="issues" id="h-issues"></ul>
+            <div class="actions"><button class="btn" data-ask="hdl">Ask the assistant to review this file</button></div>
+          </div>
+          <div class="note"><span class="flag">VERIFY</span><span>Templates list commonly used attributes, not the full object. Download the business object template from <b>Data Exchange → View Business Objects</b> to confirm required attributes for your release, then zip the .dat and load it with Import and Load Data.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FORMULA ============ -->
+    <section class="view" id="v-formula" hidden>
+      <div class="vhead"><span class="eyebrow">Build · Fast Formula</span><h1>Fast Formula scaffold</h1>
+        <p>Generate a clean, commented skeleton with defaults, inputs, local variables and the return statement, ready to paste into Manage Fast Formulas.</p></div>
+      <div class="grid2">
+        <div class="card stack">
+          <div class="row">
+            <div class="field"><label for="f-name">Formula name</label><input id="f-name" type="text" class="mono" value="XX_GRADE_ELIGIBILITY"></div>
+            <div class="field"><label for="f-type">Formula type</label>
+              <select id="f-type"><option>Participation and Rate Eligibility</option><option>Oracle Payroll</option><option>Extract Rule</option><option>Extract Criteria</option><option>Global Absence Accrual</option><option>Other</option></select></div>
+          </div>
+          <div class="field"><label for="f-desc">Description</label><input id="f-desc" type="text" value="Eligible when the worker's grade is in the senior band."></div>
+          <div class="field"><label for="f-dbi">Database items with defaults (NAME : type : default)</label>
+            <textarea id="f-dbi" rows="3" spellcheck="false">PER_ASG_GRADE_NAME : text : ' '</textarea>
+            <span class="hint">Types: number, text, date. Confirm DBI names in the formula type's database item list.</span></div>
+          <div class="field"><label for="f-in">Inputs (NAME : type)</label><textarea id="f-in" rows="2" spellcheck="false"></textarea></div>
+          <div class="field"><label for="f-body">Logic</label><textarea id="f-body" rows="7" spellcheck="false">ELIGIBLE = 'N'
+IF (PER_ASG_GRADE_NAME = 'G7' OR PER_ASG_GRADE_NAME = 'G8') THEN
+(
+  ELIGIBLE = 'Y'
+)</textarea></div>
+          <div class="field"><label for="f-ret">Return variables (comma separated)</label><input id="f-ret" type="text" class="mono" value="ELIGIBLE"><span class="hint" id="f-rethint"></span></div>
+          <label class="check"><input type="checkbox" id="f-log"> Add PAY_INTERNAL_LOG_WRITE trace lines (payroll formula types)</label>
+        </div>
+        <div class="stack">
+          <div class="card stack">
+            <h2>Formula text</h2>
+            <div class="code"><button class="copy" data-copy="f-out">Copy</button><pre id="f-out"></pre></div>
+            <ul class="issues" id="f-issues"></ul>
+            <div class="actions"><button class="btn" data-ask="formula">Ask the assistant to review this formula</button></div>
+          </div>
+          <div class="note"><span class="flag">VERIFY</span><span>Return variable names that a formula type expects are a convention of that type. Check the type's documentation and compile in a test environment.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SNIPPETS ============ -->
+    <section class="view" id="v-snippets" hidden>
+      <div class="vhead"><span class="eyebrow">Reference</span><h1>Snippet Library</h1>
+        <p>Short, working starting points for the jobs that come up every week. Each card says what to change before you use it.</p></div>
+      <div class="filters" id="s-filters" role="group" aria-label="Filter by area"></div>
+      <div class="field" style="max-width:420px"><label for="s-search">Search</label><input id="s-search" type="text" placeholder="e.g. paging, base64, lookup"></div>
+      <div class="snips" id="s-list"></div>
+    </section>
+
+    <!-- ============ UTILS ============ -->
+    <section class="view" id="v-utils" hidden>
+      <div class="vhead"><span class="eyebrow">Reference</span><h1>Utilities</h1>
+        <p>Small conversions you need mid-integration: tidy a payload, encode a file body, move between date formats.</p></div>
+      <div class="grid2 even">
+        <div class="card stack">
+          <h2>JSON format &amp; validate</h2>
+          <textarea id="u-json" rows="9" spellcheck="false">{"PersonNumber":"1001","names":[{"FirstName":"Asha","LastName":"Raman","NameType":"GLOBAL"}]}</textarea>
+          <div class="actions"><button class="btn primary" id="u-fmt">Format</button><button class="btn" id="u-min">Minify</button><span class="status" id="u-jsonstat"></span></div>
+        </div>
+        <div class="card stack">
+          <h2>Base64 encode / decode</h2>
+          <textarea id="u-b64" rows="5" spellcheck="false">METADATA|Worker|SourceSystemOwner|SourceSystemId</textarea>
+          <div class="actions"><button class="btn primary" id="u-enc">Encode</button><button class="btn" id="u-dec">Decode</button>
+            <label class="btn" for="u-file" style="cursor:pointer">Encode a file…</label><input type="file" id="u-file" hidden>
+            <span class="status" id="u-b64stat"></span></div>
+          <p class="note">Use for the <code>DocumentContent</code> of erpintegrations or attachment payloads. Files stay in your browser.</p>
+        </div>
+        <div class="card stack">
+          <h2>Date formats</h2>
+          <div class="field"><label for="u-date">Any date</label><input id="u-date" type="text" class="mono" value="2026-11-01"></div>
+          <div class="code"><button class="copy" data-copy="u-dates">Copy</button><pre id="u-dates" style="min-height:0"></pre></div>
+        </div>
+        <div class="card stack">
+          <h2>q filter from field list</h2>
+          <div class="field"><label for="u-qf">One condition per line (Field = value)</label><textarea id="u-qf" rows="4" spellcheck="false">PersonNumber = 1001
+LastName = Raman</textarea></div>
+          <label class="check"><input type="checkbox" id="u-qor"> Join with OR instead of AND</label>
+          <div class="code"><button class="copy" data-copy="u-qout">Copy</button><pre id="u-qout" style="min-height:0"></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ASSISTANT ============ -->
+    <section class="view" id="v-assistant" hidden>
+      <div class="vhead"><span class="eyebrow">Assist · Oracle-aware</span><h1>Oracle Assistant</h1>
+        <p>Ask about HCM, ERP, OIC, OCI or VBS work. Answers separate what is verified from what is assumed, and use placeholders instead of real hosts or credentials.</p></div>
+      <div class="card chat">
+        <div class="bar">
+          <div class="field" style="min-width:170px"><label for="a-domain">Domain</label>
+            <select id="a-domain"><option>Oracle Fusion HCM</option><option>Oracle ERP / SCM</option><option>Oracle Integration Cloud (OIC)</option><option>Oracle Cloud Infrastructure (OCI)</option><option>Visual Builder Studio / VBCS (Redwood)</option><option>Fusion REST APIs</option></select></div>
+          <div class="field" style="min-width:150px"><label for="a-mode">Task</label>
+            <select id="a-mode"><option>Explain</option><option>Generate</option><option>Debug</option><option>Review</option><option>Document (BRD/SDD/test cases)</option></select></div>
+          <label class="check" style="align-self:end;padding-bottom:8px"><input type="checkbox" id="a-tamil"> Add a short Tamil summary</label>
+          <span class="spacer" style="flex:1"></span>
+          <button class="btn ghost" id="a-clear" style="align-self:end">New chat</button>
+        </div>
+        <div class="log" id="a-log" aria-live="polite"></div>
+        <div class="compose">
+          <div class="starters" id="a-starters"></div>
+          <textarea id="a-input" rows="3" placeholder="Describe the requirement, paste the error, or paste the code you want reviewed. Leave out passwords, tokens and client names."></textarea>
+          <div class="actions"><button class="btn primary" id="a-send">Send</button><button class="btn" id="a-stop" hidden>Stop</button><button class="btn" id="a-copyprompt" hidden>Copy prompt</button><span class="status" id="a-status"></span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const enc = v => encodeURIComponent(v).replace(/%2C/g, ",").replace(/%3A/g, ":").replace(/%3B/g, ";").replace(/%3D/g, "=");
+
+/* ---------- copy ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-copy]"); if (!b) return;
+  const el = document.getElementById(b.dataset.copy); const text = el.innerText;
+  const done = ok => { b.textContent = ok ? "Copied" : "Selected — press Ctrl+C"; setTimeout(() => b.textContent = "Copy", 1600); };
+  try {
+    navigator.clipboard.writeText(text).then(() => done(true), () => { selectEl(el); done(false); });
+  } catch (_) { selectEl(el); done(false); }
+});
+function selectEl(el){ const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+function issues(ul, list){ ul.innerHTML = list.map(([lvl, t]) => '<li><span class="dot ' + lvl + '"></span><span>' + t + '</span></li>').join(""); }
+
+/* ---------- routing ---------- */
+const VIEWS = ["home","rest","hdl","formula","snippets","utils","assistant"];
+function show(){
+  let v = (location.hash || "#home").slice(1); if (!VIEWS.includes(v)) v = "home";
+  VIEWS.forEach(n => { document.getElementById("v-" + n).hidden = n !== v; });
+  $$(".rail a").forEach(a => a.setAttribute("aria-current", a.dataset.view === v ? "page" : "false"));
+  window.scrollTo(0, 0);
+}
+addEventListener("hashchange", show);
+
+/* deep links from overview */
+document.addEventListener("click", e => {
+  const a = e.target.closest("a[data-preset],a[data-hdl],a[data-cat]"); if (!a) return;
+  if (a.dataset.preset){ const [api, res] = a.dataset.preset.split(":"); $("#r-api").value = api; fillResources(); $("#r-res").value = res; applyPreset(); if (a.dataset.out) setOut(a.dataset.out); }
+  if (a.dataset.hdl){ $("#h-preset").value = a.dataset.hdl; applyHdlPreset(); }
+  if (a.dataset.cat){ snipCat = a.dataset.cat; renderSnips(); }
+});
+
+/* ================= REST STUDIO ================= */
+const RES = {
+  hcm: { base: "hcmRestApi", list: {
+    workers: { q: "PersonNumber='1001'", expand: "names", body: '{\n  "names": [{\n    "LegislationCode": "IN",\n    "FirstName": "Asha",\n    "LastName": "Raman"\n  }]\n}' },
+    publicWorkers: { q: "", fields: "" }, absences: {}, jobs: {}, grades: {}, positions: {}, salaries: {}, documentRecords: {}, elementEntries: {} } },
+  fscm: { base: "fscmRestApi", list: {
+    invoices: { q: "InvoiceNumber='INV-1001'", fields: "InvoiceId,InvoiceNumber,InvoiceAmount,InvoiceCurrency,Supplier" },
+    suppliers: { q: "Supplier='ACME Industrial'", fields: "SupplierId,Supplier,SupplierNumber" },
+    purchaseOrders: {}, purchaseRequisitions: {}, receivablesInvoices: {}, expenses: {},
+    erpintegrations: { body: '{\n  "OperationName": "importBulkData",\n  "DocumentContent": "<base64 of the FBDI zip>",\n  "ContentType": "zip",\n  "FileName": "ApInvoices.zip",\n  "JobName": "<job package,job definition>",\n  "ParameterList": "<comma separated ESS parameters>"\n}' } } },
+  crm: { base: "crmRestApi", list: { accounts: {}, contacts: {}, opportunities: {}, leads: {} } }
+};
+let outMode = "url";
+function fillResources(){
+  const api = $("#r-api").value;
+  $("#r-res").innerHTML = Object.keys(RES[api].list).map(k => "<option>" + k + "</option>").join("") + '<option value="__custom">Custom…</option>';
+  $("#r-conn").value = RES[api].base;
+}
+function applyPreset(){
+  const api = $("#r-api").value, res = $("#r-res").value;
+  if (res === "__custom"){ $("#r-path").value = "workers/{id}/child/names"; buildRest(); return; }
+  const p = RES[api].list[res] || {};
+  $("#r-path").value = res; $("#r-q").value = p.q || ""; $("#r-fields").value = p.fields || ""; $("#r-expand").value = p.expand || "";
+  $("#r-body").value = p.body || "{\n  \n}";
+  if (res === "erpintegrations"){ $("#r-method").value = "POST"; }
+  buildRest();
+}
+function setOut(m){ outMode = m; $$("#r-tabs .tab").forEach(t => t.setAttribute("aria-selected", t.dataset.out === m ? "true" : "false")); buildRest(); }
+function restState(){
+  const api = $("#r-api").value, m = $("#r-method").value;
+  const path = $("#r-path").value.trim().replace(/^\/+/, "");
+  const id = $("#r-id").value.trim();
+  const host = $("#r-host").value.trim().replace(/\/+$/, "");
+  const rel = "/" + RES[api].base + "/resources/" + $("#r-ver").value.trim() + "/" + path + (id ? "/" + encodeURIComponent(id) : "");
+  const params = [];
+  if (m === "GET"){
+    const add = (k, v) => { if (v !== "" && v != null) params.push([k, v]); };
+    add("q", $("#r-q").value.trim()); add("fields", $("#r-fields").value.trim()); add("expand", $("#r-expand").value.trim());
+    add("orderBy", $("#r-order").value.trim()); add("finder", $("#r-finder").value.trim());
+    if (!id){ add("limit", $("#r-limit").value.trim()); add("offset", $("#r-offset").value.trim()); if ($("#r-total").checked) add("totalResults", "true"); }
+    if ($("#r-only").checked) add("onlyData", "true");
+  }
+  const qs = params.map(([k, v]) => k + "=" + enc(v)).join("&");
+  const headers = [];
+  if ($("#r-fw").value) headers.push(["REST-Framework-Version", $("#r-fw").value]);
+  if (m === "POST" || m === "PATCH") headers.push(["Content-Type", "application/vnd.oracle.adf.resourceitem+json"]);
+  if ($("#r-eff").value.trim()) headers.push(["Effective-Of", $("#r-eff").value.trim()]);
+  return { api, m, path, id, host, rel, params, qs, url: host + rel + (qs ? "?" + qs : ""), relUrl: rel + (qs ? "?" + qs : ""), headers, body: $("#r-body").value, conn: $("#r-conn").value.trim() || RES[api].base };
+}
+function vbEndpoint(s){
+  const last = s.path.split("/").filter(x => x && !x.startsWith("{")).pop() || s.path;
+  const pre = s.m === "GET" ? (s.id ? "get_" : "getall_") : s.m === "POST" ? "create_" : s.m === "PATCH" ? "update_" : "delete_";
+  return s.conn + "/" + pre + last;
+}
+function hl(t){ return esc(t).replace(/(&quot;[^&]*?&quot;|'[^'\n]*')/g, '<span class="tk-s">$1</span>').replace(/^(#.*|\/\/.*)$/gm, '<span class="tk-d">$1</span>'); }
+function buildRest(){
+  const s = restState(), wantsBody = s.m === "POST" || s.m === "PATCH";
+  $("#r-bodywrap").hidden = !wantsBody;
+  let out = "";
+  if (outMode === "url"){
+    out = s.m + " " + s.url;
+    if (s.params.length){ out += "\n\n# Decoded query\n" + s.params.map(([k, v]) => "#   " + k + " = " + v).join("\n"); }
+    if (s.headers.length) out += "\n\n# Headers\n" + s.headers.map(h => "#   " + h[0] + ": " + h[1]).join("\n");
+  } else if (outMode === "curl"){
+    out = "# Set FUSION_TOKEN first (OAuth bearer, or use -u for basic auth on a test pod)\ncurl -sS -X " + s.m + ' "' + s.url + '" \\\n  -H "Authorization: Bearer $FUSION_TOKEN"';
+    s.headers.forEach(h => out += ' \\\n  -H "' + h[0] + ": " + h[1] + '"');
+    if (wantsBody) out += " \\\n  --data-raw '" + s.body.replace(/'/g, "'\\''") + "'";
+  } else if (outMode === "js"){
+    const hdr = s.headers.map(h => "'" + h[0] + "': '" + h[1] + "'");
+    hdr.unshift("'Authorization': 'Bearer ' + token");
+    out = "// Browser or Node 18+. Pass the token in from a secure source, never hard-code it.\nasync function callFusion(token) {\n  const res = await fetch(\"" + s.url + "\", {\n    method: '" + s.m + "',\n    headers: {\n" +
+      hdr.map(h => "      " + h).join(",\n") + "\n    }" + (wantsBody ? ",\n    body: JSON.stringify(" + s.body.trim().split("\n").join("\n    ") + ")" : "") +
+      "\n  });\n  if (!res.ok) throw new Error(res.status + ' ' + (await res.text()));\n  return " + (s.m === "DELETE" ? "res.status" : "res.json()") + ";\n}";
+  } else if (outMode === "vbs"){
+    const up = s.params.filter(p => p[0] !== "onlyData").map(p => "      " + p[0] + ": " + JSON.stringify(p[1]));
+    if ($("#r-only").checked && s.m === "GET") up.push("      onlyData: true");
+    out = "// JavaScript action chain (Visual Builder). Endpoint ID follows VB's naming for\n// service connection '" + s.conn + "' — check it in the Service Connections tab.\ndefine(['vb/action/actionChain', 'vb/action/actions', 'vb/action/actionUtils'], (ActionChain, Actions, ActionUtils) => {\n  'use strict';\n  class LoadData extends ActionChain {\n    async run(context) {\n      const { $page } = context;\n      const response = await Actions.callRest(context, {\n        endpoint: '" + vbEndpoint(s) + "',\n" +
+      (s.id ? "        uriParams: {\n          // path parameter name comes from the endpoint definition\n          '<resource>_Id': '" + s.id + "'" + (up.length ? ",\n" + up.map(x => "    " + x).join(",\n") : "") + "\n        },\n" : (up.length ? "        uriParams: {\n" + up.map(x => "    " + x).join(",\n") + "\n        },\n" : "")) +
+      (s.headers.some(h => h[0] === "Effective-Of") ? "        headers: { 'Effective-Of': '" + $("#r-eff").value.trim() + "' },\n" : "") +
+      (wantsBody ? "        body: " + s.body.trim().split("\n").join("\n        ") + ",\n" : "") +
+      "      });\n      if (!response.ok) {\n        await Actions.fireNotificationEvent(context, { summary: 'Request failed', message: String(response.status), type: 'error' });\n        return;\n      }\n      " + (s.m === "GET" && !s.id ? "$page.variables.rows = response.body.items;" : "$page.variables.result = response.body;") + "\n    }\n  }\n  return LoadData;\n});";
+  } else if (outMode === "oic"){
+    out = "# OIC — REST adapter (invoke) checklist\nConnection\n  Connection type     : REST API Base URL\n  Connection URL      : " + s.host + "\n  Security            : OAuth or Basic (test only) — use a dedicated integration user\n\nEndpoint configuration\n  Relative resource URI : /" + RES[s.api].base + "/resources/" + $("#r-ver").value.trim() + "/" + s.path + (s.id ? "/{id}" : "") + "\n  Action (verb)         : " + s.m + "\n" +
+      (s.params.length ? "  Query parameters      : " + s.params.map(p => p[0]).join(", ") + "\n" : "") +
+      (s.headers.length ? "  Custom headers        : " + s.headers.map(h => h[0]).join(", ") + "\n" : "") +
+      (wantsBody ? "  Request payload       : JSON sample → paste the body below\n" : "") +
+      (s.m === "GET" ? "  Response payload      : JSON sample → run the URL once in a test pod and paste the reply\n" : "") +
+      "\nMapper values\n" + s.params.map(p => "  " + p[0] + "  ←  " + JSON.stringify(p[1])).join("\n") +
+      (wantsBody ? "\n\nSample request\n" + s.body : "");
+  }
+  $("#r-out").innerHTML = hl(out);
+  const iss = [];
+  if (/\{pod\}|\{region\}/.test(s.host)) iss.push(["warn", "Replace <code>{pod}</code> and <code>{region}</code> with your environment host."]);
+  if (s.m === "GET" && s.params.find(p => p[0] === "q") && $("#r-fw").value === "1") iss.push(["warn", "Framework version 1 only supports the semicolon form of <code>q</code>; use 2 or later for AND/OR expressions."]);
+  if (wantsBody){ try { JSON.parse(s.body); iss.push(["ok", "Body is valid JSON."]); } catch (e){ iss.push(["bad", "Body is not valid JSON: " + esc(e.message)]); } }
+  if (s.m === "PATCH" && s.api === "hcm" && !$("#r-eff").value.trim()) iss.push(["warn", "Effective-dated HCM objects usually need an <code>Effective-Of</code> header on PATCH to choose UPDATE or CORRECTION."]);
+  if ((s.m === "PATCH" || s.m === "DELETE") && !s.id) iss.push(["bad", "PATCH and DELETE need an item key."]);
+  if (s.m === "GET" && +$("#r-limit").value > 500) iss.push(["warn", "Large limits are often capped by the server; page with offset and hasMore instead."]);
+  if (!iss.length) iss.push(["ok", "Request looks complete."]);
+  issues($("#r-issues"), iss);
+}
+$("#r-api").addEventListener("change", () => { fillResources(); applyPreset(); });
+$("#r-res").addEventListener("change", applyPreset);
+$$("#v-rest input, #v-rest select, #v-rest textarea").forEach(el => { if (el.id !== "r-api" && el.id !== "r-res") el.addEventListener("input", buildRest); });
+$$("#r-tabs .tab").forEach(t => t.addEventListener("click", () => setOut(t.dataset.out)));
+
+/* ================= HDL BUILDER ================= */
+const HDL = {
+  Worker: { file: "Worker.dat", attrs: "SourceSystemOwner|SourceSystemId|EffectiveStartDate|EffectiveEndDate|PersonNumber|StartDate|ActionCode",
+    rows: ",EMP_1001,2026/11/01,4712/12/31,1001,2026/11/01,HIRE\n,EMP_1002,2026/11/01,4712/12/31,1002,2026/11/01,HIRE" },
+  PersonName: { file: "Worker.dat", attrs: "SourceSystemOwner|SourceSystemId|PersonId(SourceSystemId)|EffectiveStartDate|EffectiveEndDate|LegislationCode|NameType|FirstName|LastName",
+    rows: ",EMP_1001_NAME,EMP_1001,2026/11/01,4712/12/31,IN,GLOBAL,Asha,Raman\n,EMP_1002_NAME,EMP_1002,2026/11/01,4712/12/31,IN,GLOBAL,Karthik,Selvam" },
+  PersonEmail: { file: "Worker.dat", attrs: "SourceSystemOwner|SourceSystemId|PersonId(SourceSystemId)|DateFrom|EmailType|EmailAddress|PrimaryFlag",
+    rows: ",EMP_1001_EMAIL,EMP_1001,2026/11/01,W1,asha.raman@example.com,Y" },
+  ElementEntry: { file: "ElementEntry.dat", attrs: "SourceSystemOwner|SourceSystemId|EffectiveStartDate|EffectiveEndDate|AssignmentNumber|ElementName|LegislativeDataGroupName|EntryType|CreatorType",
+    rows: ",EE_1001_BONUS,2026/11/01,2026/11/30,E1001,Festival Bonus,IN LDG,E,H" },
+  Custom: { file: "Custom.dat", attrs: "SourceSystemOwner|SourceSystemId|EffectiveStartDate", rows: ",KEY_1,2026/11/01" }
+};
+function parseCsvLine(line){
+  const out = []; let cur = "", q = false;
+  for (let i = 0; i < line.length; i++){
+    const c = line[i];
+    if (q){ if (c === '"' && line[i+1] === '"'){ cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"') q = true; else if (c === ","){ out.push(cur); cur = ""; } else cur += c;
+  }
+  out.push(cur); return out.map(v => v.trim());
+}
+function applyHdlPreset(){
+  const p = HDL[$("#h-preset").value];
+  $("#h-obj").value = $("#h-preset").value === "Custom" ? "MyObject" : $("#h-preset").value;
+  $("#h-attrs").value = p.attrs; $("#h-rows").value = p.rows; $("#h-file").value = p.file; buildHdl();
+}
+function buildHdl(){
+  const obj = $("#h-obj").value.trim() || "Object", act = $("#h-action").value;
+  const attrs = $("#h-attrs").value.split(/[|,\n]/).map(s => s.trim()).filter(Boolean);
+  const lines = $("#h-rows").value.split(/\r?\n/).filter(l => l.trim());
+  const sso = $("#h-sso").value.trim(); const ssoIdx = attrs.indexOf("SourceSystemOwner");
+  const iss = []; const out = [];
+  if ($("#h-comment").checked) out.push("COMMENT " + obj + " " + act + " — generated " + new Date().toISOString().slice(0, 10) + " — " + lines.length + " record(s)");
+  out.push("METADATA|" + obj + "|" + attrs.join("|"));
+  const dateCols = attrs.map((a, i) => /date|datefrom|dateto/i.test(a) ? i : -1).filter(i => i >= 0);
+  let badDates = 0, pipes = 0;
+  lines.forEach((l, n) => {
+    const v = parseCsvLine(l);
+    if (v.length !== attrs.length) iss.push(["bad", "Row " + (n + 1) + " has " + v.length + " values; METADATA has " + attrs.length + "."]);
+    if (ssoIdx >= 0 && !v[ssoIdx] && sso) v[ssoIdx] = sso;
+    dateCols.forEach(i => { if (v[i] && !/^\d{4}\/\d{2}\/\d{2}$/.test(v[i])) badDates++; });
+    v.forEach(x => { if (x.includes("|")) pipes++; });
+    out.push(act + "|" + obj + "|" + v.map(x => x.replace(/\|/g, "\\|")).join("|"));
+  });
+  if (badDates) iss.push(["warn", badDates + " date value(s) are not in HDL's default <code>YYYY/MM/DD</code> format."]);
+  if (pipes) iss.push(["warn", pipes + " value(s) contained a pipe; they were escaped as <code>\\|</code>."]);
+  if (!attrs.includes("SourceSystemId") && !attrs.some(a => /Id$|Number$/.test(a))) iss.push(["warn", "No key attribute found. Include SourceSystemId, a surrogate ID, or a user key."]);
+  if (act === "DELETE") iss.push(["warn", "DELETE removes records. Run it in a test pod first and keep the matching MERGE file for rollback."]);
+  if (!iss.some(i => i[0] !== "ok")) iss.unshift(["ok", lines.length + " record(s), " + attrs.length + " attributes, columns match."]);
+  $("#h-title").textContent = $("#h-file").value || obj + ".dat";
+  $("#h-out").innerHTML = esc(out.join("\n")).replace(/^(METADATA|MERGE|DELETE|COMMENT)\|?/gm, m => '<span class="tk-k">' + m + "</span>");
+  issues($("#h-issues"), iss);
+}
+$("#h-preset").addEventListener("change", applyHdlPreset);
+$$("#v-hdl input, #v-hdl select, #v-hdl textarea").forEach(el => { if (el.id !== "h-preset") el.addEventListener("input", buildHdl); });
+
+/* ================= FAST FORMULA ================= */
+const FF_HINT = {
+  "Participation and Rate Eligibility": "Eligibility formulas conventionally return ELIGIBLE ('Y' or 'N').",
+  "Global Absence Accrual": "Accrual formulas conventionally return ACCRUAL.",
+  "Oracle Payroll": "Payroll formulas return the variables that map to the element's formula results.",
+  "Extract Rule": "Return the single value the extract attribute should hold.",
+  "Extract Criteria": "Return the value your extract criteria checks.",
+  "Other": ""
+};
+function parseDecl(txt){ return txt.split(/\n/).map(l => l.split(":").map(s => s.trim())).filter(a => a[0]); }
+function ffDefault(t, d){
+  if (d) return d + (t === "date" && !/\(date\)/i.test(d) ? " (date)" : "");
+  return t === "number" ? "0" : t === "date" ? "'1951/01/01 00:00:00' (date)" : "' '";
+}
+function buildFormula(){
+  const name = $("#f-name").value.trim().toUpperCase().replace(/\s+/g, "_") || "XX_FORMULA";
+  const type = $("#f-type").value; const log = $("#f-log").checked;
+  const dbis = parseDecl($("#f-dbi").value), ins = parseDecl($("#f-in").value);
+  const rets = $("#f-ret").value.split(",").map(s => s.trim()).filter(Boolean);
+  const L = [];
+  L.push("/*" + "*".repeat(60));
+  L.push(" FORMULA NAME : " + name);
+  L.push(" FORMULA TYPE : " + type);
+  L.push(" DESCRIPTION  : " + $("#f-desc").value.trim());
+  L.push(" CHANGE LOG   : " + new Date().toISOString().slice(0, 10) + "  1.0  Initial version");
+  L.push("*".repeat(60) + "*/", "");
+  if (dbis.length){ L.push("/* Defaults for database items */"); dbis.forEach(([n, t, d]) => L.push("DEFAULT FOR " + n.toUpperCase() + " IS " + ffDefault((t || "text").toLowerCase(), d))); L.push(""); }
+  if (ins.length){
+    L.push("/* Defaults for inputs */"); ins.forEach(([n, t]) => L.push("DEFAULT FOR " + n.toUpperCase() + " IS " + ffDefault((t || "number").toLowerCase())));
+    L.push("INPUTS ARE " + ins.map(([n, t]) => n.toUpperCase() + " (" + (t || "number").toLowerCase() + ")").join(", "), "");
+  }
+  if (log) L.push("l_log = PAY_INTERNAL_LOG_WRITE('" + name + " - start')", "");
+  L.push("/* Logic */");
+  $("#f-body").value.split("\n").forEach(l => L.push(l));
+  L.push("");
+  if (log) L.push("l_log = PAY_INTERNAL_LOG_WRITE('" + name + " - end')", "");
+  L.push("RETURN " + rets.join(", "));
+  const text = L.join("\n");
+  $("#f-out").innerHTML = esc(text)
+    .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="tk-d">$1</span>')
+    .replace(/\b(DEFAULT FOR|IS|INPUTS ARE|IF|THEN|ELSE|RETURN|AND|OR|WAS DEFAULTED)\b/g, '<span class="tk-k">$1</span>')
+    .replace(/('[^'\n]*')/g, '<span class="tk-s">$1</span>');
+  $("#f-rethint").textContent = FF_HINT[type] || "";
+  const iss = [];
+  if (!rets.length) iss.push(["bad", "Add at least one return variable."]);
+  rets.forEach(r => { if (!new RegExp("\\b" + r + "\\s*=", "i").test($("#f-body").value)) iss.push(["warn", "<code>" + esc(r) + "</code> is returned but never assigned in the logic."]); });
+  if (type === "Participation and Rate Eligibility" && !rets.map(r => r.toUpperCase()).includes("ELIGIBLE")) iss.push(["warn", "Eligibility formulas usually return ELIGIBLE."]);
+  if (name.length > 80) iss.push(["warn", "Formula name is unusually long."]);
+  if (log && !/Payroll/.test(type)) iss.push(["warn", "PAY_INTERNAL_LOG_WRITE output appears in payroll process logs; it is not useful for every formula type."]);
+  const opens = ($("#f-body").value.match(/\(/g) || []).length, closes = ($("#f-body").value.match(/\)/g) || []).length;
+  if (opens !== closes) iss.push(["bad", "Parentheses in the logic are unbalanced (" + opens + " open, " + closes + " close)."]);
+  if (!iss.length) iss.push(["ok", "Structure looks complete. Compile it to confirm DBI names."]);
+  issues($("#f-issues"), iss);
+}
+$$("#v-formula input, #v-formula select, #v-formula textarea").forEach(el => el.addEventListener("input", buildFormula));
+
+/* ================= SNIPPETS ================= */
+const SNIPS = [
+  { cat: "HCM", lang: "SQL · BIP", title: "Active employees with primary assignment", desc: "Data model query for a BI Publisher report. Change the name type or add legal employer joins as needed.",
+    code: "SELECT papf.person_number,\n       ppnf.full_name,\n       paam.assignment_number\nFROM   per_all_people_f      papf\nJOIN   per_person_names_f    ppnf\n       ON  ppnf.person_id = papf.person_id\n       AND ppnf.name_type = 'GLOBAL'\n       AND TRUNC(SYSDATE) BETWEEN ppnf.effective_start_date AND ppnf.effective_end_date\nJOIN   per_all_assignments_m paam\n       ON  paam.person_id = papf.person_id\n       AND paam.primary_flag = 'Y'\n       AND paam.assignment_type = 'E'\n       AND paam.effective_latest_change = 'Y'\n       AND TRUNC(SYSDATE) BETWEEN paam.effective_start_date AND paam.effective_end_date\nWHERE  TRUNC(SYSDATE) BETWEEN papf.effective_start_date AND papf.effective_end_date\nAND    paam.assignment_status_type = 'ACTIVE'\nORDER  BY papf.person_number" },
+  { cat: "HCM", lang: "REST", title: "Worker with names and emails", desc: "Read one worker and its child collections in a single call.",
+    code: "GET /hcmRestApi/resources/11.13.18.05/workers\n    ?q=PersonNumber='1001'\n    &expand=names,emails\n    &onlyData=true\n\nREST-Framework-Version: 4" },
+  { cat: "HCM", lang: "HDL", title: "Delete element entries by source key", desc: "Rollback for a bad element entry load. Keys must match the original MERGE file.",
+    code: "METADATA|ElementEntry|SourceSystemOwner|SourceSystemId\nDELETE|ElementEntry|VANTAGE|EE_1001_BONUS" },
+  { cat: "ERP", lang: "SQL · BIP", title: "Payables invoices from the last 30 days", desc: "Supplier name comes from the party record linked to the supplier.",
+    code: "SELECT aia.invoice_num,\n       aia.invoice_date,\n       aia.invoice_amount,\n       aia.invoice_currency_code,\n       hp.party_name AS supplier_name\nFROM   ap_invoices_all aia\nJOIN   poz_suppliers   ps ON ps.vendor_id = aia.vendor_id\nJOIN   hz_parties      hp ON hp.party_id  = ps.party_id\nWHERE  aia.creation_date >= TRUNC(SYSDATE) - 30\nORDER  BY aia.creation_date DESC" },
+  { cat: "ERP", lang: "REST · FBDI", title: "Load and import an FBDI zip", desc: "One call uploads the zip to UCM and submits the import job. Job name, document account and parameters depend on the FBDI template; take them from its documentation.",
+    code: "POST /fscmRestApi/resources/11.13.18.05/erpintegrations\nContent-Type: application/json\n\n{\n  \"OperationName\": \"importBulkData\",\n  \"DocumentContent\": \"<base64 of the zip>\",\n  \"ContentType\": \"zip\",\n  \"FileName\": \"ApInvoices.zip\",\n  \"DocumentAccount\": \"<UCM account for the template>\",\n  \"JobName\": \"<job package>,<job definition>\",\n  \"ParameterList\": \"<parameters in template order>\"\n}\n\n# Then poll status:\nGET /fscmRestApi/resources/11.13.18.05/erpintegrations\n    ?finder=ESSJobStatusRF;requestId=<ReqstId from the response>" },
+  { cat: "OIC", lang: "XPath", title: "Format today's date in the mapper", desc: "xp20 functions are available in the OIC mapper. Picture strings follow XPath 2.0.",
+    code: "xp20:format-dateTime(fn:current-dateTime(), '[Y0001]-[M01]-[D01]')\n\n<!-- HDL style date -->\nxp20:format-dateTime(fn:current-dateTime(), '[Y0001]/[M01]/[D01]')" },
+  { cat: "OIC", lang: "XPath", title: "Lookup a value", desc: "Translate a source code through an OIC lookup with a default when not found.",
+    code: "dvm:lookupValue('XX_GRADE_MAP', 'Legacy', /nsmpr0:execute/ns17:request/ns17:grade, 'Fusion', 'UNMAPPED')" },
+  { cat: "OIC", lang: "REST", title: "List failed integration instances", desc: "OIC monitoring REST API. On OIC 3 add the integrationInstance query parameter with your instance name.",
+    code: "GET https://<oic-host>/ic/api/integration/v1/monitoring/instances\n    ?q={timewindow:'1d', status:'FAILED'}\n    &integrationInstance=<instance-name>\nAuthorization: Bearer <token>" },
+  { cat: "OCI", lang: "OCI CLI", title: "Stage a file in Object Storage", desc: "Upload an HDL zip or extract output to a bucket for downstream pickup.",
+    code: "oci os object put \\\n  --bucket-name <bucket> \\\n  --file ./Worker.zip \\\n  --name hdl/inbound/Worker.zip" },
+  { cat: "OCI", lang: "OCI CLI", title: "Create a pre-authenticated request", desc: "Time-boxed read link for one object. Keep the expiry short and never log the URL.",
+    code: "oci os preauth-request create \\\n  --bucket-name <bucket> \\\n  --name worker-zip-read \\\n  --access-type ObjectRead \\\n  --object-name hdl/inbound/Worker.zip \\\n  --time-expires 2026-11-30T00:00:00Z" },
+  { cat: "OCI", lang: "OCI CLI", title: "Invoke an OCI Function", desc: "Quick test of a function before wiring it into OIC.",
+    code: "oci fn function invoke \\\n  --function-id <function-ocid> \\\n  --file \"-\" \\\n  --body '{\"personNumber\":\"1001\"}'" },
+  { cat: "VBS", lang: "JS", title: "Call a REST endpoint from an action chain", desc: "Endpoint ID is <service connection>/<operation>. Check the exact ID in the Service Connections tab.",
+    code: "const response = await Actions.callRest(context, {\n  endpoint: 'hcmRestApi/getall_workers',\n  uriParams: {\n    q: \"PersonNumber='1001'\",\n    onlyData: true,\n    limit: 25\n  }\n});\nif (response.ok) {\n  $page.variables.workers = response.body.items;\n}" },
+  { cat: "VBS", lang: "Expression", title: "Current user in expressions", desc: "Application-level user details available in page expressions.",
+    code: "[[ $application.user.username ]]\n[[ $application.user.fullName ]]\n[[ $application.user.roles ]]" },
+  { cat: "REST", lang: "JS", title: "Read every page of a collection", desc: "Fusion collections return hasMore; keep fetching with offset until it is false.",
+    code: "async function fetchAll(baseUrl, token, pageSize) {\n  const rows = [];\n  let offset = 0, hasMore = true;\n  while (hasMore) {\n    const url = baseUrl + '&limit=' + pageSize + '&offset=' + offset;\n    const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });\n    if (!res.ok) throw new Error(res.status + ' ' + (await res.text()));\n    const data = await res.json();\n    rows.push(...data.items);\n    hasMore = data.hasMore;\n    offset += data.count;\n  }\n  return rows;\n}" },
+  { cat: "REST", lang: "REST", title: "Describe a resource", desc: "Returns attributes, child resources, finders and actions for your pod's release.",
+    code: "GET /hcmRestApi/resources/11.13.18.05/workers/describe\nGET /fscmRestApi/resources/11.13.18.05/invoices/describe" }
+];
+let snipCat = "All";
+function renderSnips(){
+  const cats = ["All", "HCM", "ERP", "OIC", "OCI", "VBS", "REST"];
+  $("#s-filters").innerHTML = cats.map(c => '<button class="chip" aria-pressed="' + (c === snipCat) + '" data-c="' + c + '">' + c + "</button>").join("");
+  const q = $("#s-search").value.trim().toLowerCase();
+  const list = SNIPS.filter(s => (snipCat === "All" || s.cat === snipCat) && (!q || (s.title + s.desc + s.code + s.lang).toLowerCase().includes(q)));
+  $("#s-list").innerHTML = list.length ? list.map((s, i) => '<article class="card snip"><header><h3>' + esc(s.title) + '</h3><span class="meta">' + s.cat + " · " + esc(s.lang) + "</span></header><p>" + esc(s.desc) +
+    '</p><div class="code"><button class="copy" data-copy="sn' + i + '">Copy</button><pre id="sn' + i + '">' + esc(s.code) + "</pre></div></article>").join("")
+    : '<p class="note">No snippets match. Try a broader word, or ask the assistant.</p>';
+}
+$("#s-filters").addEventListener("click", e => { const b = e.target.closest("[data-c]"); if (b){ snipCat = b.dataset.c; renderSnips(); } });
+$("#s-search").addEventListener("input", renderSnips);
+
+/* ================= UTILITIES ================= */
+$("#u-fmt").onclick = () => { try { $("#u-json").value = JSON.stringify(JSON.parse($("#u-json").value), null, 2); $("#u-jsonstat").textContent = "Valid JSON"; } catch (e){ $("#u-jsonstat").textContent = "Invalid: " + e.message; } };
+$("#u-min").onclick = () => { try { $("#u-json").value = JSON.stringify(JSON.parse($("#u-json").value)); $("#u-jsonstat").textContent = "Minified"; } catch (e){ $("#u-jsonstat").textContent = "Invalid: " + e.message; } };
+$("#u-enc").onclick = () => { const b = new TextEncoder().encode($("#u-b64").value); let s = ""; b.forEach(x => s += String.fromCharCode(x)); $("#u-b64").value = btoa(s); $("#u-b64stat").textContent = "Encoded (UTF-8)"; };
+$("#u-dec").onclick = () => { try { const s = atob($("#u-b64").value.trim()); $("#u-b64").value = new TextDecoder().decode(Uint8Array.from(s, c => c.charCodeAt(0))); $("#u-b64stat").textContent = "Decoded"; } catch (_){ $("#u-b64stat").textContent = "That is not valid Base64."; } };
+$("#u-file").onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { $("#u-b64").value = String(r.result).split(",")[1] || ""; $("#u-b64stat").textContent = f.name + " · " + Math.round(f.size / 1024) + " KB encoded"; }; r.readAsDataURL(f); };
+function dates(){
+  const raw = $("#u-date").value.trim().replace(/\//g, "-");
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(raw) ? new Date(raw + "T00:00:00Z") : new Date(raw);
+  if (isNaN(d)) { $("#u-dates").textContent = "Enter a date such as 2026-11-01 or 2026/11/01."; return; }
+  const p = n => String(n).padStart(2, "0"), y = d.getUTCFullYear(), m = p(d.getUTCMonth() + 1), dd = p(d.getUTCDate());
+  const mon = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"][d.getUTCMonth()];
+  $("#u-dates").textContent = [
+    "HDL default        " + y + "/" + m + "/" + dd,
+    "REST date          " + y + "-" + m + "-" + dd,
+    "REST timestamp     " + y + "-" + m + "-" + dd + "T00:00:00+00:00",
+    "Fast Formula date  '" + y + "/" + m + "/" + dd + " 00:00:00' (date)",
+    "SQL literal        DATE '" + y + "-" + m + "-" + dd + "'",
+    "Oracle DD-MON-YYYY " + dd + "-" + mon + "-" + y,
+    "Epoch ms (UTC)     " + d.getTime()
+  ].join("\n");
+}
+$("#u-date").addEventListener("input", dates);
+function qBuild(){
+  const join = $("#u-qor").checked ? " or " : " and ";
+  const parts = $("#u-qf").value.split("\n").map(l => l.trim()).filter(Boolean).map(l => {
+    const m = l.match(/^(\w+)\s*(=|!=|<>|>=|<=|>|<|LIKE)\s*(.+)$/i); if (!m) return null;
+    const v = m[3].trim().replace(/^'|'$/g, ""); return m[1] + " " + m[2].toUpperCase().replace("!=", "<>") + " '" + v.replace(/'/g, "''") + "'";
+  }).filter(Boolean);
+  $("#u-qout").textContent = parts.length ? "q=" + parts.join(join) + "\n\nURL-encoded:\nq=" + encodeURIComponent(parts.join(join)) : "Write conditions like PersonNumber = 1001";
+}
+$("#u-qf").addEventListener("input", qBuild); $("#u-qor").addEventListener("change", qBuild);
+
+/* ================= ASSISTANT ================= */
+const STARTERS = [
+  "Explain the difference between UPDATE and CORRECTION in the HCM REST Effective-Of header.",
+  "My OIC REST invoke to Fusion returns 401 only in production. How do I narrow it down?",
+  "Generate test cases for a VBS page that approves payroll changes.",
+  "How should I load supplier bank accounts — REST, FBDI or HDL?",
+  "Write an SDD section for an OIC integration that loads Worker.dat from Object Storage."
+];
+const RULES = () => "You are the assistant inside Vantage Workbench, a toolkit for Oracle Cloud consultants. " +
+  "Domain focus: " + $("#a-domain").value + ". Task type: " + $("#a-mode").value + ".\n" +
+  "Rules:\n" +
+  "- Start with the purpose, then how it works, then numbered steps to implement and test.\n" +
+  "- Distinguish Oracle Fusion HCM, ERP/SCM, OIC, OCI, VBS/VBCS, Redwood and Oracle JET precisely.\n" +
+  "- Never invent table names, REST resources, attribute names, DBIs or UI navigation paths. If unsure, say so and say exactly where to verify (REST API guide, /describe, View Business Objects, OTBI subject areas, Oracle docs).\n" +
+  "- Label statements as Verified, Assumption or Version-dependent where it matters.\n" +
+  "- Use placeholders for hosts, client names and IDs. Never ask for or repeat passwords, tokens or keys.\n" +
+  "- Recommend one primary approach with short trade-offs rather than many options.\n" +
+  "- Use simple, professional English and fenced code blocks for code.\n" +
+  ($("#a-tamil").checked ? "- End with a 2-3 line summary in simple Tamil.\n" : "") +
+  "Reply in Markdown.";
+let turns = [], sample = null, ctl = null, busy = false;
+function md(t){
+  const parts = t.split(/```/);
+  return parts.map((p, i) => {
+    if (i % 2) { const nl = p.indexOf("\n"); return "<pre><code>" + esc(nl >= 0 ? p.slice(nl + 1) : p) + "</code></pre>"; }
+    const lines = esc(p).split("\n"); let html = "", list = null;
+    const inline = s => s.replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+    const close = () => { if (list){ html += "</" + list + ">"; list = null; } };
+    lines.forEach(l => {
+      let m;
+      if ((m = l.match(/^\s*[-*] (.*)/))){ if (list !== "ul"){ close(); html += "<ul>"; list = "ul"; } html += "<li>" + inline(m[1]) + "</li>"; }
+      else if ((m = l.match(/^\s*\d+[.)] (.*)/))){ if (list !== "ol"){ close(); html += "<ol>"; list = "ol"; } html += "<li>" + inline(m[1]) + "</li>"; }
+      else if ((m = l.match(/^#{1,4} (.*)/))){ close(); html += "<p><b>" + inline(m[1]) + "</b></p>"; }
+      else if (l.trim()){ close(); html += "<p>" + inline(l) + "</p>"; }
+      else close();
+    });
+    close(); return html;
+  }).join("");
+}
+function addMsg(role, html){ const d = document.createElement("div"); d.className = "msg " + (role === "user" ? "me" : "ai"); d.innerHTML = (role === "user" ? "" : '<div class="who">Assistant</div>') + '<div class="body">' + html + "</div>"; $("#a-log").append(d); $("#a-log").scrollTop = 1e9; return d.querySelector(".body"); }
+function welcome(){
+  $("#a-log").innerHTML = "";
+  addMsg("assistant", md("Pick a domain and task above, then describe what you need. You can also send a request from REST Studio, HDL Builder or Fast Formula with their **Ask the assistant** buttons."));
+  $("#a-starters").innerHTML = STARTERS.map(s => "<button>" + esc(s) + "</button>").join("");
+}
+$("#a-starters").addEventListener("click", e => { const b = e.target.closest("button"); if (b){ $("#a-input").value = b.textContent; $("#a-input").focus(); } });
+$("#a-clear").onclick = () => { if (ctl) ctl.abort(); turns = []; welcome(); $("#a-status").textContent = ""; };
+const ERR = { not_granted: "The assistant is not allowed for this page. You can allow it from the artifact's Permissions menu.", sampling_disabled: "Claude is not available for this account.", rate_limited: "Too many requests just now. Wait a minute and send again.", refused: "The assistant declined that request. Rephrase it and try again.", session_expired: "Your session expired. Sign in again and reload.", prompt_too_large: "That message is too long. Send a shorter excerpt." };
+async function send(){
+  const text = $("#a-input").value.trim(); if (!text || busy) return;
+  if (!sample){ $("#a-status").textContent = "The live assistant is only available when this page is opened in Claude. Use Copy prompt to paste it into a chat."; $("#a-copyprompt").hidden = false; return; }
+  busy = true; $("#a-send").disabled = true; $("#a-stop").hidden = false;
+  addMsg("user", esc(text).replace(/\n/g, "<br>")); $("#a-input").value = "";
+  turns.push({ role: "user", content: text }); if (turns.length > 12) turns = turns.slice(-12);
+  if (turns[0].role !== "user") turns.shift();
+  const body = addMsg("assistant", '<p class="status">Thinking…</p>');
+  ctl = new AbortController();
+  try {
+    const { text: ans, truncated } = await sample([{ role: "user", content: RULES() }, ...turns], { cache: false, signal: ctl.signal, onText: ({ text }) => { body.innerHTML = md(text); $("#a-log").scrollTop = 1e9; } });
+    body.innerHTML = md(ans) + (truncated ? '<p class="status">Answer was cut short. Ask for the rest.</p>' : "");
+    turns.push({ role: "assistant", content: ans });
+    $("#a-status").textContent = "";
+  } catch (e){
+    if (e && e.code === "cancelled"){ body.innerHTML = e.text ? md(e.text) : '<p class="status">Stopped.</p>'; if (e.text) turns.push({ role: "assistant", content: e.text }); }
+    else if (e && e.code === "refused"){ body.innerHTML = '<p class="status">' + ERR.refused + "</p>"; turns.pop(); }
+    else { body.innerHTML = (e && e.text ? md(e.text) : "") + '<p class="status">' + (ERR[e && e.code] || "The request did not complete. Send it again.") + "</p>"; if (e && (e.code === "not_granted" || e.code === "sampling_disabled")){ sample = null; setPill(false); } }
+  } finally { busy = false; $("#a-send").disabled = false; $("#a-stop").hidden = true; ctl = null; }
+}
+$("#a-send").onclick = send;
+$("#a-input").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) send(); });
+$("#a-stop").onclick = () => ctl && ctl.abort();
+$("#a-copyprompt").onclick = () => {
+  const t = RULES() + "\n\n" + $("#a-input").value;
+  try { navigator.clipboard.writeText(t).then(() => $("#a-status").textContent = "Prompt copied.", () => $("#a-status").textContent = "Copy was blocked by the browser."); } catch (_){ $("#a-status").textContent = "Copy was blocked by the browser."; }
+};
+function setPill(on){ const p = $("#aiPill"); p.textContent = on ? "Assistant: live" : "Assistant: offline"; p.classList.toggle("live", on); }
+
+/* hand-off from generators */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-ask]"); if (!b) return;
+  const src = b.dataset.ask;
+  const map = { rest: ["Fusion REST APIs", "Review", "Review this Fusion REST request. Check the resource, query syntax, headers and anything likely to fail. Suggest fixes.\n\n```\n" + $("#r-out").innerText + "\n```"],
+    hdl: ["Oracle Fusion HCM", "Review", "Review this HDL file for structure, keys, date formats and likely load errors.\n\n```\n" + $("#h-out").innerText + "\n```"],
+    formula: ["Oracle Fusion HCM", "Review", "Review this Fast Formula for syntax, defaults, DBI usage and return values.\n\n```\n" + $("#f-out").innerText + "\n```"] }[src];
+  $("#a-domain").value = map[0]; $("#a-mode").value = map[1]; $("#a-input").value = map[2];
+  location.hash = "#assistant";
+});
+
+/* ---------- boot ---------- */
+fillResources(); applyPreset(); applyHdlPreset(); buildFormula(); renderSnips(); dates(); qBuild(); welcome(); show();
+setPill(false); $("#aiPill").textContent = "Assistant: connecting…";
+(async () => {
+  try { sample = window.claude && window.claude.use ? await window.claude.use("sample") : null; } catch (_){ sample = null; }
+  setPill(!!sample);
+  if (!sample) $("#a-copyprompt").hidden = false;
+})();
+})();
+</script>
