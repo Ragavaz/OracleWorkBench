@@ -1,0 +1,829 @@
+{
+ "area": "OCI",
+ "title": "Oracle Cloud Infrastructure services for Fusion integrations",
+ "generated": "2026-10-29",
+ "sources": [
+  {
+   "title": "OCI CLI Command Reference",
+   "url": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/"
+  },
+  {
+   "title": "Object Storage Pre-Authenticated Requests",
+   "url": "https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingpreauthenticatedrequests.htm"
+  },
+  {
+   "title": "Object Storage Object Lifecycle Management",
+   "url": "https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usinglifecyclepolicies.htm"
+  },
+  {
+   "title": "Controlling Access to Invoke and Manage Functions",
+   "url": "https://docs.oracle.com/en-us/iaas/Content/Functions/Tasks/functionsrestrictinguseraccess.htm"
+  },
+  {
+   "title": "Adding a Function in OCI Functions as an API Gateway Back End",
+   "url": "https://docs.oracle.com/en-us/iaas/Content/APIGateway/Tasks/apigatewayusingfunctionsbackend.htm"
+  },
+  {
+   "title": "Common Policies",
+   "url": "https://docs.oracle.com/en-us/iaas/Content/Identity/Concepts/commonpolicies.htm"
+  },
+  {
+   "title": "Request Signatures",
+   "url": "https://docs.oracle.com/en-us/iaas/Content/API/Concepts/signingrequests.htm"
+  },
+  {
+   "title": "Invoke OCI Functions from an Integration (OCI Function action)",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/invoke-oracle-cloud-infrastructure-functions-directly-from-integration-oci-function-action.html"
+  }
+ ],
+ "categories": [
+  {
+   "id": "oci-object-storage",
+   "name": "Object Storage CLI",
+   "description": "oci os commands used to stage files for OIC, exchange files with vendors and manage retention.",
+   "items": [
+    {
+     "id": "oci-os-ns-get",
+     "name": "oci os ns get",
+     "kind": "oci",
+     "summary": "Return the tenancy's Object Storage namespace, needed in URLs and some commands.",
+     "path": "oci os ns get",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/os/ns/get.html",
+     "verified": true,
+     "notes": "Each tenancy has one system-generated namespace that cannot be edited. Most os commands look it up automatically when --namespace is omitted.",
+     "examples": [
+      {
+       "title": "Get namespace",
+       "lang": "bash",
+       "code": "oci os ns get"
+      }
+     ]
+    },
+    {
+     "id": "oci-os-object-put",
+     "name": "oci os object put",
+     "kind": "oci",
+     "summary": "Upload a local file (or STDIN) as an object.",
+     "path": "oci os object put",
+     "keyFields": [
+      "--bucket-name",
+      "--file",
+      "--name",
+      "--force"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/os/object/put.html",
+     "verified": true,
+     "notes": "Required: --bucket-name (-bn), --file ('-' for STDIN). --name defaults to the file name (required with STDIN). --content-type defaults to application/octet-stream. --force overwrites without prompt; --no-overwrite refuses. Files above 128 MiB use multipart by default (--part-size > 10 MiB, default 128; --parallel-upload-count max 1000; --no-multipart forces single part). Note: Oracle's --metadata/--from-json samples have unbalanced quotes; use valid JSON such as '{\"key1\":\"value1\"}'.",
+     "examples": [
+      {
+       "title": "Upload an HDL file under a prefix",
+       "lang": "bash",
+       "code": "oci os object put -bn hdl-inbound --file Worker.dat --name inbound/Worker.dat --force"
+      }
+     ]
+    },
+    {
+     "id": "oci-os-object-get",
+     "name": "oci os object get",
+     "kind": "oci",
+     "summary": "Download an object to a local file or STDOUT.",
+     "path": "oci os object get",
+     "keyFields": [
+      "--bucket-name",
+      "--name",
+      "--file"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/os/object/get.html",
+     "verified": true,
+     "notes": "Required: --bucket-name, --name, --file ('-' for STDOUT). Options: --range bytes=2-10, --if-match/--if-none-match etag, --version-id, --multipart-download-threshold (min 128 MiB), --parallel-download-count (default 10).",
+     "examples": [
+      {
+       "title": "Download to a local file",
+       "lang": "bash",
+       "code": "oci os object get -bn hdl-inbound --name inbound/Worker.dat --file ./Worker.dat"
+      }
+     ]
+    },
+    {
+     "id": "oci-os-object-list",
+     "name": "oci os object list",
+     "kind": "oci",
+     "summary": "List objects in a bucket, optionally by prefix, with selected fields.",
+     "path": "oci os object list",
+     "keyFields": [
+      "--prefix",
+      "--all",
+      "--fields"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/os/object/list.html",
+     "verified": true,
+     "notes": "--prefix filters names; --all fetches every page (cannot combine with --limit, default limit 100); --start, --fields (name,size,etag,md5,timeCreated,timeModified,storageTier,archivalState); --delimiter supports only '/'.",
+     "examples": [
+      {
+       "title": "List files waiting in inbound/",
+       "lang": "bash",
+       "code": "oci os object list --bucket-name hdl-inbound --prefix inbound/ --all --fields name,size,timeModified"
+      }
+     ]
+    },
+    {
+     "id": "oci-os-bulk-upload",
+     "name": "oci os object bulk-upload",
+     "kind": "oci",
+     "summary": "Upload every file in a local directory tree, with include/exclude patterns and an object prefix.",
+     "path": "oci os object bulk-upload",
+     "keyFields": [
+      "--src-dir",
+      "--include",
+      "--object-prefix",
+      "--dry-run"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/os/object/bulk-upload.html",
+     "verified": true,
+     "notes": "Required: --bucket-name, --src-dir. --include/--exclude patterns (*, ?, [seq], [!seq]) can repeat; --object-prefix (alias --prefix) prepends to names; --overwrite or --no-overwrite avoid prompts (--overwrite is also faster); --dry-run lists what would upload.",
+     "examples": [
+      {
+       "title": "Preview then upload CSV files",
+       "lang": "bash",
+       "code": "oci os object bulk-upload -bn vendor-exchange --src-dir ./outbound --include '*.csv' --object-prefix vendorA/ --dry-run\noci os object bulk-upload -bn vendor-exchange --src-dir ./outbound --include '*.csv' --object-prefix vendorA/ --no-overwrite"
+      }
+     ]
+    },
+    {
+     "id": "oci-os-preauth-create",
+     "name": "oci os preauth-request create",
+     "kind": "oci",
+     "summary": "Create a pre-authenticated request (PAR) that lets someone without OCI credentials read and/or write a bucket, an object, or objects under a prefix.",
+     "path": "oci os preauth-request create",
+     "keyFields": [
+      "--access-type",
+      "--time-expires",
+      "--object-name",
+      "access-uri"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/os/preauth-request/create.html",
+     "verified": true,
+     "notes": "Required: --bucket-name, --name, --access-type (AnyObjectRead, AnyObjectReadWrite, AnyObjectWrite, ObjectRead, ObjectReadWrite, ObjectWrite), --time-expires (RFC 3339, e.g. 2026-12-31T23:59:00Z or a date). --object-name (-on) can be an object or a prefix. --bucket-listing-action ListObjects|Deny for AnyObjectRead/ReadWrite. Output data.access-uri is a path (/p/<token>/n/<ns>/b/<bucket>/o/); prefix it with https://objectstorage.<region>.oraclecloud.com. Creating PARs needs PAR_MANAGE on the bucket plus the object permissions you grant.",
+     "examples": [
+      {
+       "title": "Write-only PAR for a vendor prefix",
+       "lang": "bash",
+       "code": "oci os preauth-request create -bn vendor-exchange --name vendorA-upload \\\n  --access-type AnyObjectWrite -on vendorA/ --time-expires 2026-12-31T23:59:00Z"
+      }
+     ]
+    },
+    {
+     "id": "oci-os-par-usage",
+     "name": "Using a PAR URL (upload and download)",
+     "kind": "concept",
+     "summary": "Third parties use the PAR URL with curl or wget to PUT or GET objects without OCI credentials.",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingpreauthenticatedrequests_topic-Working_with_PreAuthenticated_Requests.htm",
+     "verified": true,
+     "notes": "The URL is shown only at creation and cannot be retrieved later; store it securely. For an object PAR with a prefix, the user must add the prefix to the URL. Use multipart (opc-multipart:true header) above 100 MiB; max object 10 TiB. PARs cannot be edited (create a new one) and deleting the PAR revokes access. A PAR stops working if its creator loses permissions. Treat the URL as a secret.",
+     "examples": [
+      {
+       "title": "Vendor uploads a file",
+       "lang": "bash",
+       "code": "curl -X PUT --data-binary '@payroll_2026_10.csv' \\\n  'https://objectstorage.<region>.oraclecloud.com/p/<token>/n/<namespace>/b/vendor-exchange/o/vendorA/payroll_2026_10.csv'"
+      },
+      {
+       "title": "Download with a PAR",
+       "lang": "bash",
+       "code": "curl -X GET -o file.csv '<par-url>'"
+      }
+     ]
+    },
+    {
+     "id": "oci-os-lifecycle-put",
+     "name": "oci os object-lifecycle-policy put",
+     "kind": "oci",
+     "summary": "Set a bucket's lifecycle rules to archive, move to Infrequent Access, delete objects/versions, or abort stale multipart uploads.",
+     "path": "oci os object-lifecycle-policy put",
+     "keyFields": [
+      "action",
+      "target",
+      "time-amount",
+      "time-unit",
+      "object-name-filter"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usinglifecyclepolicies_topic-To_create_a_lifecycle_policy_rule.htm",
+     "verified": true,
+     "notes": "put replaces the whole policy, so include every rule you want to keep. Actions in Oracle's examples: ARCHIVE, INFREQUENT_ACCESS, DELETE, ABORT; targets objects, previous-object-versions, multipart-uploads; time-unit DAYS. One policy per bucket, up to 1,000 rules; filters by inclusion-prefixes, inclusion-patterns, exclusion-patterns (max 20 patterns). Runs once a day. Requires the Object Storage service policy (see IAM item). Deleted objects cannot be recovered; test on non-production data.",
+     "examples": [
+      {
+       "title": "Delete processed files after 30 days",
+       "lang": "bash",
+       "code": "oci os object-lifecycle-policy put --bucket-name hdl-inbound --items '[\n  {\"action\": \"DELETE\", \"is-enabled\": true, \"name\": \"purge-processed\",\n   \"object-name-filter\": {\"inclusion-prefixes\": [\"processed/\"]},\n   \"target\": \"objects\", \"time-amount\": 30, \"time-unit\": \"DAYS\"}\n]'"
+      }
+     ]
+    },
+    {
+     "id": "oci-os-bucket-object-events",
+     "name": "Enable object events on a bucket",
+     "kind": "oci",
+     "summary": "Turn on 'Emit object events' so object create/update/delete changes can trigger Events rules.",
+     "path": "oci os bucket update --object-events-enabled",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/managingbuckets_topic-To_enable_or_disable_emitting_events_for_object_state_changes.htm",
+     "verified": true,
+     "notes": "CLI: oci os bucket update --name <bucket> --object-events-enabled true|false. Oracle states this cannot be done through the API (Console or CLI only). Response shows object-events-enabled: true.",
+     "examples": [
+      {
+       "title": "Enable events",
+       "lang": "bash",
+       "code": "oci os bucket update --name vendor-exchange --object-events-enabled true"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oci-functions-apigw",
+   "name": "Functions and API Gateway",
+   "description": "Create and invoke OCI Functions and expose them through API Gateway deployments.",
+   "items": [
+    {
+     "id": "oci-fn-application-create",
+     "name": "oci fn application create",
+     "kind": "oci",
+     "summary": "Create a Functions application (container for functions) in a compartment and subnet(s).",
+     "path": "oci fn application create",
+     "keyFields": [
+      "--compartment-id",
+      "--display-name",
+      "--subnet-ids",
+      "--config"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/fn/application/create.html",
+     "verified": true,
+     "notes": "Required: --compartment-id, --display-name (unique in the compartment), --subnet-ids (JSON array; generate a template with --generate-param-json-input subnet-ids). --config passes environment variables (keys letters, digits, underscore; total 4 KB). --shape GENERIC_X86 (default), GENERIC_ARM, GENERIC_X86_ARM.",
+     "examples": [
+      {
+       "title": "Create an application",
+       "lang": "bash",
+       "code": "oci fn application create --compartment-id <compartment-ocid> \\\n  --display-name oic-helpers --subnet-ids '[\"<subnet-ocid>\"]' --config '{\"LOG_LEVEL\":\"INFO\"}'"
+      }
+     ]
+    },
+    {
+     "id": "oci-fn-cli-deploy",
+     "name": "Fn Project CLI: init, deploy, invoke",
+     "kind": "oci",
+     "summary": "Scaffold, build/push/deploy and test a function from Cloud Shell or a workstation with the fn CLI.",
+     "path": "fn init | fn deploy | fn invoke",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/Content/Functions/Tasks/functionscreatingfirst.htm",
+     "verified": true,
+     "notes": "Oracle's Helloworld sequence: fn init --runtime java <name>; from the function directory fn -v deploy --app <application>; fn invoke <application> <function>. A configured Fn CLI context (registry, compartment) is a prerequisite (separate topic).",
+     "examples": [
+      {
+       "title": "Create, deploy and test",
+       "lang": "bash",
+       "code": "fn init --runtime java sign-payload\ncd sign-payload\nfn -v deploy --app oic-helpers\nfn invoke oic-helpers sign-payload"
+      }
+     ]
+    },
+    {
+     "id": "oci-fn-function-invoke",
+     "name": "oci fn function invoke",
+     "kind": "oci",
+     "summary": "Invoke a deployed function by OCID from the OCI CLI and save the response.",
+     "path": "oci fn function invoke",
+     "keyFields": [
+      "--function-id",
+      "--file",
+      "--body",
+      "--fn-invoke-type"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/fn/function/invoke.html",
+     "verified": true,
+     "notes": "Required: --function-id, --file (response file or '-' for STDOUT), --body. Request size limit 6 MB. --fn-invoke-type sync|detached; --fn-intent httprequest|cloudevent.",
+     "examples": [
+      {
+       "title": "Synchronous test call",
+       "lang": "bash",
+       "code": "oci fn function invoke --function-id <function-ocid> --file - --body '{\"text\":\"hello\"}'"
+      }
+     ]
+    },
+    {
+     "id": "oci-apigw-deployment-create",
+     "name": "oci api-gateway deployment create",
+     "kind": "oci",
+     "summary": "Deploy an API specification (routes and back ends) on an existing API gateway under a path prefix.",
+     "path": "oci api-gateway deployment create",
+     "keyFields": [
+      "--gateway-id",
+      "--path-prefix",
+      "--specification"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/api-gateway/deployment/create.html",
+     "verified": true,
+     "notes": "Required: --compartment-id, --gateway-id, --path-prefix, --specification (JSON; generate a template with --generate-param-json-input specification). Route paths are relative to the path prefix.",
+     "examples": [
+      {
+       "title": "Create a deployment",
+       "lang": "bash",
+       "code": "oci api-gateway deployment create --compartment-id <compartment-ocid> \\\n  --gateway-id <gateway-ocid> --path-prefix /v1 --specification file://specification.json"
+      }
+     ]
+    },
+    {
+     "id": "oci-apigw-functions-backend",
+     "name": "API deployment spec with a Functions back end",
+     "kind": "oci",
+     "summary": "Specification JSON that routes a path and method to an OCI function (ORACLE_FUNCTIONS_BACKEND).",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/Content/APIGateway/Tasks/apigatewayusingfunctionsbackend.htm",
+     "verified": true,
+     "notes": "Fields: routes[].path, routes[].methods, backend.type ORACLE_FUNCTIONS_BACKEND, backend.functionId. The gateway also needs an IAM policy allowing API gateways to use functions (see IAM category).",
+     "examples": [
+      {
+       "title": "specification.json",
+       "lang": "json",
+       "code": "{\n  \"routes\": [\n    {\n      \"path\": \"/hello\",\n      \"methods\": [\"GET\"],\n      \"backend\": {\n        \"type\": \"ORACLE_FUNCTIONS_BACKEND\",\n        \"functionId\": \"<function-ocid>\"\n      }\n    }\n  ]\n}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oci-security",
+   "name": "Vault secrets, IAM policies and request signing",
+   "description": "Verbatim documented policy forms and secret/signing mechanics used around OIC, Functions and Object Storage. Replace placeholders only.",
+   "items": [
+    {
+     "id": "oci-secrets-bundle-get",
+     "name": "oci secrets secret-bundle get",
+     "kind": "oci",
+     "summary": "Retrieve the current (or a specific) version of a Vault secret by OCID; get-secret-bundle-by-name works with --secret-name and --vault-id.",
+     "path": "oci secrets secret-bundle get",
+     "keyFields": [
+      "--secret-id",
+      "--stage",
+      "secret-bundle-content"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/secrets/secret-bundle/get.html",
+     "verified": true,
+     "notes": "Required: --secret-id. Optional --stage CURRENT|PENDING|LATEST|PREVIOUS|DEPRECATED, --version-number, --secret-version-name; default is CURRENT. Content is base64: the SDK model SecretBundle.secret_bundle_content (Base64SecretBundleContentDetails.content, content_type BASE64); in CLI JSON this appears as data.\"secret-bundle-content\".content (key spelling inferred from CLI kebab-case output; confirm with one test run).",
+     "examples": [
+      {
+       "title": "Read and decode a secret",
+       "lang": "bash",
+       "code": "oci secrets secret-bundle get --secret-id <secret-ocid> --stage CURRENT \\\n  --query 'data.\"secret-bundle-content\".content' --raw-output | base64 --decode"
+      },
+      {
+       "title": "By name",
+       "lang": "bash",
+       "code": "oci secrets secret-bundle get-secret-bundle-by-name --secret-name oic-client-secret --vault-id <vault-ocid> --stage CURRENT"
+      }
+     ]
+    },
+    {
+     "id": "oci-iam-oic-dynamic-group",
+     "name": "Dynamic group and policies for OIC native OCI actions",
+     "kind": "oci",
+     "summary": "Let an OIC 3 instance call OCI Functions and Object Storage with its resource principal (OCI Function and OCI Object Storage actions).",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/invoke-oracle-cloud-infrastructure-functions-directly-from-integration-oci-function-action.html",
+     "verified": true,
+     "notes": "Dynamic group matching rule uses the OIC instance's OAuth client ID. Policies as documented: functions-family for the Function action; inspect compartments for the Object Storage action (Oracle refers to Securing Object Storage for finer object permissions, so add object/bucket permissions as needed and test). Prefix identity_domain/ when the dynamic group is not in the default domain. Tenancy must use identity domains.",
+     "examples": [
+      {
+       "title": "Dynamic group rule",
+       "lang": "text",
+       "code": "resource.id = '<oic-oauth-client-id>'"
+      },
+      {
+       "title": "Policies (documented forms)",
+       "lang": "text",
+       "code": "Allow dynamic-group <dynamic-group> to use functions-family in compartment <functions-compartment>\nAllow dynamic-group <dynamic-group> to inspect compartments in compartment <oic-compartment>\nAllow dynamic-group <identity-domain>/<dynamic-group> to use functions-family in compartment <functions-compartment>"
+      }
+     ]
+    },
+    {
+     "id": "oci-iam-functions",
+     "name": "Policies to manage and invoke Functions",
+     "kind": "oci",
+     "summary": "Grant developers management of applications/functions and restrict invocation to specific apps or functions.",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/Content/Functions/Tasks/functionsrestrictinguseraccess.htm",
+     "verified": true,
+     "notes": "manage functions-family includes invoke rights; for manage-without-invoke use fn-app and fn-function. Invocation can be scoped with target.app.id or target.function.id and by network source. A private subnet does not block the invoke endpoint; control access with policies.",
+     "examples": [
+      {
+       "title": "Documented statements",
+       "lang": "text",
+       "code": "Allow group <group-name> to manage functions-family in compartment <compartment-name>\nAllow group <group-name> to manage fn-app in compartment <compartment-name>\nAllow group <group-name> to manage fn-function in compartment <compartment-name>\nAllow group <group-name> to use fn-invocation in compartment <compartment-name> where target.function.id = '<function-OCID>'"
+      }
+     ]
+    },
+    {
+     "id": "oci-iam-object-storage",
+     "name": "Policies for Object Storage users and lifecycle",
+     "kind": "oci",
+     "summary": "Common read/write/admin policies for buckets and objects, plus the service authorization required for lifecycle rules.",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/Content/Identity/Concepts/commonpolicies.htm",
+     "verified": true,
+     "notes": "Lifecycle policies need the Object Storage service itself authorized (documented on the Object Lifecycle Management page; create in the root compartment; repeat per region). PAR creation needs PAR_MANAGE.",
+     "examples": [
+      {
+       "title": "Writers, readers, admins",
+       "lang": "text",
+       "code": "Allow group ObjectWriters to read buckets in compartment ABC\nAllow group ObjectWriters to manage objects in compartment ABC where any {request.permission='OBJECT_CREATE', request.permission='OBJECT_INSPECT'}\nAllow group ObjectReaders to read buckets in compartment ABC\nAllow group ObjectReaders to read objects in compartment ABC\nAllow group ObjectAdmins to manage buckets in tenancy\nAllow group ObjectAdmins to manage objects in tenancy"
+      },
+      {
+       "title": "Lifecycle service authorization",
+       "lang": "text",
+       "code": "Allow service objectstorage-<region_identifier> to manage object-family in compartment <compartment_name>"
+      }
+     ]
+    },
+    {
+     "id": "oci-iam-apigw-functions",
+     "name": "Policy for API Gateway to call Functions",
+     "kind": "oci",
+     "summary": "Allow API gateways in one compartment to use functions in another, and let developers manage gateway resources.",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/Content/APIGateway/Tasks/apigatewaycreatingpolicies.htm",
+     "verified": true,
+     "notes": "Use the OCID of the API gateway compartment in the condition and the name of the functions compartment in the scope.",
+     "examples": [
+      {
+       "title": "Documented statements",
+       "lang": "text",
+       "code": "ALLOW any-user to use functions-family in compartment <functions-compartment-name> where ALL {request.principal.type= 'ApiGateway', request.resource.compartment.id = '<api-gateway-compartment-OCID>'}\nAllow group <group-name> to manage api-gateway-family in compartment <compartment-name>"
+      }
+     ]
+    },
+    {
+     "id": "oci-iam-secrets-events-ons",
+     "name": "Policies for Vault secrets, Events and Notifications",
+     "kind": "oci",
+     "summary": "Documented forms for secret management/reading, Events rules and Notifications topics.",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/Content/Identity/Concepts/commonpolicies.htm",
+     "verified": true,
+     "notes": "The 'read secret-bundles' line comes from the Data Integration example on the Common Policies page and omits the word 'compartment' as written there; standard syntax is '... in compartment <name>'. Check the Vault policy reference before production use.",
+     "examples": [
+      {
+       "title": "Documented statements",
+       "lang": "text",
+       "code": "Allow group SecurityAdmins to manage secret-family in compartment ABC where target.vault.id='<vault_OCID>'\nAllow group SecretsUsers to use secret-family in tenancy\nAllow group RuleReaders to read cloudevents-rules in tenancy\nAllow group TopicManagers to manage ons-topics in tenancy\nAllow group TopicUsers to use ons-topics in tenancy"
+      }
+     ]
+    },
+    {
+     "id": "oci-iam-oic-instance",
+     "name": "Policy to administer Oracle Integration instances",
+     "kind": "oci",
+     "summary": "Let an identity-domain group manage (create, start, stop, delete) OIC 3 instances in a compartment.",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/application-integration/doc/henosis-creating-iam-policy-identity-domain.html",
+     "verified": true,
+     "notes": "Resource type integration-instance; read lets users view instances, manage gives full control. Omit domain-name for the default domain. Optional read metrics for monitoring.",
+     "examples": [
+      {
+       "title": "Documented example",
+       "lang": "text",
+       "code": "allow group admin/oci-integration-admins to manage integration-instance in compartment OICCompartment"
+      }
+     ]
+    },
+    {
+     "id": "oci-request-signing",
+     "name": "OCI API request signing (Signature v1)",
+     "kind": "concept",
+     "summary": "How REST calls to OCI APIs are signed with an API key when not using the CLI/SDK (e.g. REST Adapter OCI Signature Version 1 or custom scripts).",
+     "keyFields": [
+      "keyId",
+      "algorithm",
+      "headers",
+      "x-content-sha256"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/Content/API/Concepts/signingrequests.htm",
+     "verified": true,
+     "notes": "Authorization: Signature with version=\"1\", keyId=\"<tenancy-ocid>/<user-ocid>/<key-fingerprint>\", algorithm=\"rsa-sha256\", headers list and base64 signature. GET/DELETE sign (request-target), host, date (or x-date). PUT/POST also sign x-content-sha256, content-type, content-length (even for empty body), except Object Storage PutObject/UploadPart which need only (request-target), host, date. Header names lowercase; keep query order; URL-encode path/query (RFC 3986); clock skew over 5 minutes returns 401. Prefer the CLI/SDK or OIC's OCI Signature Version 1 policy over hand-rolled signing.",
+     "examples": [
+      {
+       "title": "Header shape",
+       "lang": "text",
+       "code": "Authorization: Signature version=\"1\",keyId=\"<tenancy_ocid>/<user_ocid>/<key_fingerprint>\",algorithm=\"rsa-sha256\",headers=\"(request-target) date x-content-sha256 content-type content-length\",signature=\"<base64-signature>\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oci-events-notifications",
+   "name": "Events and Notifications",
+   "description": "React to resource changes (for example new objects in a bucket) and publish messages to subscribers.",
+   "items": [
+    {
+     "id": "oci-events-rule-create",
+     "name": "oci events rule create",
+     "kind": "oci",
+     "summary": "Create a rule that matches events with a condition and runs actions (for example a Notifications topic or a function).",
+     "path": "oci events rule create",
+     "keyFields": [
+      "--condition",
+      "--actions",
+      "--is-enabled"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/events/rule/create.html",
+     "verified": true,
+     "notes": "Required: --actions (JSON; generate with --generate-param-json-input actions), --compartment-id, --condition, --display-name, --is-enabled. Condition: fields not listed are ignored, {} matches all, wildcard * supported, applies to the compartment and children. Object Storage events need 'Emit object events' enabled on the bucket; take the exact eventType string from 'Services that Produce Events' (not captured in this catalog).",
+     "examples": [
+      {
+       "title": "Create a rule",
+       "lang": "bash",
+       "code": "oci events rule create --display-name vendor-file-arrived --is-enabled true \\\n  --compartment-id <compartment-ocid> \\\n  --condition '{\"eventType\":\"<object-create-event-type>\",\"data\":{\"additionalDetails\":{\"bucketName\":\"vendor-exchange\"}}}' \\\n  --actions file://actions.json"
+      }
+     ]
+    },
+    {
+     "id": "oci-ons-message-publish",
+     "name": "oci ons message publish",
+     "kind": "oci",
+     "summary": "Publish a message to a Notifications topic (email, HTTPS, function, etc. subscribers).",
+     "path": "oci ons message publish",
+     "keyFields": [
+      "--topic-id",
+      "--body",
+      "--title"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/ons/message/publish.html",
+     "verified": true,
+     "notes": "Required: --topic-id, --body; optional --title. Limits: 64 KB per message; 60 messages/min per HTTP endpoint and 10/min for EMAIL; 60 TPM per topic. --message-type is deprecated. Create topics with oci ons topic create and subscriptions with oci ons subscription create.",
+     "examples": [
+      {
+       "title": "Publish an alert",
+       "lang": "bash",
+       "code": "oci ons message publish --topic-id <topic-ocid> --title 'OIC errors' --body 'HCM_WORKER_SYNC has 3 failed instances in the last hour'"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oci-database-oic-admin",
+   "name": "Autonomous Database and OIC instance administration",
+   "description": "CLI for ATP wallets and for listing, starting and stopping Oracle Integration instances.",
+   "items": [
+    {
+     "id": "oci-adb-generate-wallet",
+     "name": "oci db autonomous-database generate-wallet",
+     "kind": "oci",
+     "summary": "Download the ATP/ADB credentials wallet (zip) needed by the OIC ATP Adapter connection and SQL clients.",
+     "path": "oci db autonomous-database generate-wallet",
+     "keyFields": [
+      "--autonomous-database-id",
+      "--file",
+      "--password"
+     ],
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/db/autonomous-database/generate-wallet.html",
+     "verified": true,
+     "notes": "Required: --autonomous-database-id, --file, --password (at least 8 characters with 1 letter and 1 number or special character). --generate-type SINGLE (one database) or ALL (all in region) for serverless. Store the wallet and its password as secrets; rotate if leaked.",
+     "examples": [
+      {
+       "title": "Download wallet",
+       "lang": "bash",
+       "code": "oci db autonomous-database generate-wallet --autonomous-database-id <adb-ocid> \\\n  --file ./Wallet_STAGING.zip --password \"$WALLET_PASSWORD\" --generate-type SINGLE"
+      }
+     ]
+    },
+    {
+     "id": "oci-oic-instance-list",
+     "name": "oci integration integration-instance list",
+     "kind": "oci",
+     "summary": "List Oracle Integration instances in a compartment, filtered by name or lifecycle state.",
+     "path": "oci integration integration-instance list",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/integration/integration-instance/list.html",
+     "verified": true,
+     "notes": "Required: --compartment-id. --lifecycle-state ACTIVE, CREATING, DELETED, DELETING, FAILED, INACTIVE, UPDATING; --display-name; --all.",
+     "examples": [
+      {
+       "title": "Active instances",
+       "lang": "bash",
+       "code": "oci integration integration-instance list --compartment-id <compartment-ocid> --lifecycle-state ACTIVE --all"
+      }
+     ]
+    },
+    {
+     "id": "oci-oic-instance-stop-start",
+     "name": "oci integration integration-instance stop / start",
+     "kind": "oci",
+     "summary": "Stop an ACTIVE OIC instance (e.g. non-production overnight) and start it again.",
+     "path": "oci integration integration-instance stop|start",
+     "docUrl": "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/integration/integration-instance/stop.html",
+     "verified": true,
+     "notes": "Required: --id. Asynchronous work request; use --wait-for-state SUCCEEDED (also ACCEPTED, CANCELED, CANCELING, FAILED, IN_PROGRESS) with --max-wait-seconds (default 1200). Stop schedules first so runs are not missed unexpectedly. The start page was not read; start is listed as a sibling subcommand and is assumed to take --id like stop.",
+     "examples": [
+      {
+       "title": "Stop and wait",
+       "lang": "bash",
+       "code": "oci integration integration-instance stop --id <oic-instance-ocid> --wait-for-state SUCCEEDED"
+      },
+      {
+       "title": "Start",
+       "lang": "bash",
+       "code": "oci integration integration-instance start --id <oic-instance-ocid>"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "cookbook": [
+  {
+   "id": "oci-stage-hdl-object-storage",
+   "title": "Stage HDL files in Object Storage for OIC to load",
+   "module": "OCI",
+   "level": "intermediate",
+   "problem": "Source systems or scripts produce HDL .dat files; OIC should pick them up from a bucket and submit them to HCM Data Loader.",
+   "prerequisites": [
+    "Bucket hdl-inbound with inbound/ and processed/ prefixes",
+    "OIC dynamic group and policy for the OCI Object Storage action",
+    "HCM Cloud Adapter connection"
+   ],
+   "steps": [
+    "Upload files with oci os object put (or bulk-upload) under inbound/.",
+    "In an OIC schedule integration, use the OCI Object Storage action 'List objects' on the bucket and filter names starting with inbound/.",
+    "For each object, 'Download object' (1 GB limit; returns a stream reference).",
+    "Call the HCM adapter 'Import Bulk Data using HCM Data Loader (HDL)' > 'Submit an HCM Data Loader job', mapping the file reference; store the Process ID as a business identifier. Assumption to test: if the stream reference cannot be mapped directly, convert it with decodeBase64ToReference(encodeReferenceToBase64(...)).",
+    "Poll with 'Query the Status of an HCM Data Loader Job' inside a While loop with a Wait.",
+    "Upload a copy under processed/ and delete the inbound object with the action, and add a lifecycle rule to purge processed/ after 30 days."
+   ],
+   "examples": [
+    {
+     "title": "Stage the file",
+     "lang": "bash",
+     "code": "oci os object put -bn hdl-inbound --file Worker.dat --name inbound/Worker.dat\noci os object list -bn hdl-inbound --prefix inbound/"
+    }
+   ],
+   "testing": [
+    "Load one small Worker.dat in test; confirm the Process ID in OIC and the HDL import status in HCM.",
+    "Confirm the object left inbound/."
+   ],
+   "rollback": [
+    "Pause the OIC schedule; remove unprocessed files from inbound/.",
+    "Correct loaded HCM data with a corrective HDL file; HDL loads are not undone automatically."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/invoke-object-storage-oci-object-storage-action.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/hcm-adapter/invoke-operation-page.html",
+    "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/os/object/put.html"
+   ]
+  },
+  {
+   "id": "oci-function-from-oic",
+   "title": "Call an OCI Function from an OIC integration",
+   "module": "OCI",
+   "level": "intermediate",
+   "problem": "Logic that OIC cannot do natively (custom signature, GZIP/TAR, PDF parsing) should run in a function and be called from the flow.",
+   "prerequisites": [
+    "Tenancy with identity domains",
+    "VCN subnet for Functions",
+    "OIC instance OAuth client ID (for the dynamic group)"
+   ],
+   "steps": [
+    "Create the application: oci fn application create with compartment, display name and subnet IDs.",
+    "Create and deploy the function: fn init, fn -v deploy --app <app>; test with oci fn function invoke.",
+    "Create a dynamic group with rule resource.id = '<oic-oauth-client-id>' and the policy 'Allow dynamic-group <dg> to use functions-family in compartment <c>'.",
+    "In OIC add the OCI Function action: Region, Compartment, Application, Function; define JSON request/response samples.",
+    "For promotion, override Function URI in the mapper (Function Override) instead of re-running the wizard per environment."
+   ],
+   "examples": [
+    {
+     "title": "Test before wiring OIC",
+     "lang": "bash",
+     "code": "oci fn function invoke --function-id <function-ocid> --file - --body '{\"text\":\"hello\"}'"
+    }
+   ],
+   "testing": [
+    "CLI invoke returns the expected JSON.",
+    "OIC instance activity stream shows the function request and response; an auth error means the dynamic group/policy is missing."
+   ],
+   "rollback": [
+    "Remove the action or deactivate the integration; redeploy the previous function image with fn deploy if the function changed."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/invoke-oracle-cloud-infrastructure-functions-directly-from-integration-oci-function-action.html",
+    "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/fn/application/create.html",
+    "https://docs.oracle.com/en-us/iaas/Content/Functions/Tasks/functionscreatingfirst.htm"
+   ]
+  },
+  {
+   "id": "oci-secret-retrieval",
+   "title": "Keep integration credentials in Vault and read them in automation scripts",
+   "module": "OCI",
+   "level": "starter",
+   "problem": "Promotion and monitoring scripts need the OIC confidential-app client secret without storing it in files or pipelines.",
+   "prerequisites": [
+    "Vault and secret created",
+    "Policy allowing the script's group or principal to read the secret (see IAM items)",
+    "OCI CLI configured"
+   ],
+   "steps": [
+    "Store the client secret as a Vault secret (for example oic-client-secret).",
+    "In the script, read the CURRENT version with oci secrets secret-bundle get and base64-decode the content.",
+    "Use the value to request an OAuth token from the identity domain, then call the OIC Developer API.",
+    "Rotate the secret in Vault; scripts pick up the new CURRENT version automatically."
+   ],
+   "examples": [
+    {
+     "title": "Token from a Vault-held secret",
+     "lang": "bash",
+     "code": "SECRET=$(oci secrets secret-bundle get --secret-id <secret-ocid> --stage CURRENT \\\n  --query 'data.\"secret-bundle-content\".content' --raw-output | base64 --decode)\nTOKEN=$(curl -s -u \"<client-id>:$SECRET\" -d 'grant_type=client_credentials&scope=<app-scope>' \\\n  https://<identity-domain-host>/oauth2/v1/token | python3 -c 'import sys,json;print(json.load(sys.stdin)[\"access_token\"])')"
+    }
+   ],
+   "testing": [
+    "Run the script and confirm a 200 from GET /ic/api/integration/v1/integrations.",
+    "Confirm the secret value never appears in logs (disable shell tracing)."
+   ],
+   "rollback": [
+    "Point the script back to the previous secret version with --version-number, or restore the old client secret in the identity domain."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/secrets/secret-bundle/get.html",
+    "https://docs.oracle.com/en-us/iaas/Content/KeyManagement/Tasks/managingsecrets_topic-To_view_the_properties_for_all_versions_of_a_secret.htm",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/call-developer-apis-client-credentials.html"
+   ]
+  },
+  {
+   "id": "oci-atp-staging-table",
+   "title": "ATP staging table between OIC and Fusion",
+   "module": "OCI",
+   "level": "advanced",
+   "problem": "Large or multi-step loads need a place to land, validate and reconcile records before sending them to Fusion.",
+   "prerequisites": [
+    "Autonomous Transaction Processing database and schema user",
+    "Wallet downloaded",
+    "OIC ATP Adapter connection"
+   ],
+   "steps": [
+    "Download the wallet with oci db autonomous-database generate-wallet and create the ATP Adapter connection with it.",
+    "Create a staging table with a batch ID and status column (your own DDL).",
+    "In OIC, insert source rows with 'Perform an Operation on a Table' (Insert; multiple records per request).",
+    "Call a stored procedure ('Invoke a Stored Procedure') to validate and mark rows READY or ERROR.",
+    "Select READY rows to build the Fusion payload (REST, HDL or FBDI), then update status to SENT with the Fusion request/process ID.",
+    "For CSV files already in Object Storage, consider the adapter's bulk data import (direct connectivity to ATP-S, CSV only)."
+   ],
+   "examples": [
+    {
+     "title": "Example staging table (project-specific DDL)",
+     "lang": "sql",
+     "code": "CREATE TABLE xx_worker_stg (\n  batch_id      VARCHAR2(40)  NOT NULL,\n  person_number VARCHAR2(30)  NOT NULL,\n  payload       CLOB,\n  status        VARCHAR2(20)  DEFAULT 'NEW' NOT NULL,\n  fusion_ref    VARCHAR2(60),\n  created_on    TIMESTAMP     DEFAULT SYSTIMESTAMP\n);"
+    }
+   ],
+   "testing": [
+    "Load a batch with valid and invalid rows; confirm statuses after the procedure.",
+    "Reconcile counts between staging and Fusion."
+   ],
+   "rollback": [
+    "Delete or mark the batch by batch_id; the staging table isolates Fusion from partial loads."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/db/autonomous-database/generate-wallet.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/atp-adapter/oracle-autonomous-transaction-processing-adapter-capabilities.html"
+   ]
+  },
+  {
+   "id": "oci-par-vendor-exchange",
+   "title": "Vendor file exchange with a pre-authenticated request",
+   "module": "OCI",
+   "level": "intermediate",
+   "problem": "A vendor without OCI access must drop files for OIC to process, and support should be told when files arrive.",
+   "prerequisites": [
+    "Bucket vendor-exchange",
+    "Notifications topic with an email subscription",
+    "Policies for PAR_MANAGE and Events/Notifications"
+   ],
+   "steps": [
+    "Create a write-only PAR scoped to the vendor prefix with an expiry date; copy the URL immediately (shown once) and send it through a secure channel.",
+    "Enable object events on the bucket (oci os bucket update --object-events-enabled true).",
+    "Create an Events rule for object create in vendor-exchange with a Notifications topic action.",
+    "Have OIC list and download files under vendorA/ (OCI Object Storage action) on a schedule.",
+    "Add a lifecycle rule to delete vendor files after the agreed retention.",
+    "Revoke by deleting the PAR; create a new PAR to change access (PARs cannot be edited)."
+   ],
+   "examples": [
+    {
+     "title": "Create the PAR",
+     "lang": "bash",
+     "code": "oci os preauth-request create -bn vendor-exchange --name vendorA-upload \\\n  --access-type AnyObjectWrite -on vendorA/ --time-expires 2026-12-31T23:59:00Z"
+    },
+    {
+     "title": "Vendor upload (prefix added manually)",
+     "lang": "bash",
+     "code": "curl -X PUT --data-binary '@invoices.csv' \\\n  'https://objectstorage.<region>.oraclecloud.com/p/<token>/n/<namespace>/b/vendor-exchange/o/vendorA/invoices.csv'"
+    }
+   ],
+   "testing": [
+    "Upload a test file with the PAR; confirm the email notification and that OIC picks it up.",
+    "Confirm the PAR cannot read or list (write-only)."
+   ],
+   "rollback": [
+    "Delete the PAR to revoke access; disable the Events rule; restore deleted files only from your own backups (lifecycle deletes are permanent)."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/os/preauth-request/create.html",
+    "https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingpreauthenticatedrequests.htm",
+    "https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/events/rule/create.html",
+    "https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usinglifecyclepolicies.htm"
+   ]
+  }
+ ]
+}
