@@ -1,0 +1,1348 @@
+{
+ "area": "OIC",
+ "title": "Oracle Integration 3 (OIC Gen 3)",
+ "generated": "2026-10-29",
+ "sources": [
+  {
+   "title": "Developer API for Oracle Integration 3 - REST endpoints",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/rest-endpoints.html"
+  },
+  {
+   "title": "Call the Developer APIs with Client Credentials",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/call-developer-apis-client-credentials.html"
+  },
+  {
+   "title": "REST API for Oracle Integration 3 - Send Requests",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/SendRequests.html"
+  },
+  {
+   "title": "Using Integrations in Oracle Integration 3",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/index.html"
+  },
+  {
+   "title": "Using the Oracle Mapper with Oracle Integration 3",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/mapper-user/index.html"
+  },
+  {
+   "title": "Using the Oracle ERP Cloud Adapter with Oracle Integration 3",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/erp-adapter/index.html"
+  },
+  {
+   "title": "Using the Oracle HCM Cloud Adapter with Oracle Integration 3",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/hcm-adapter/index.html"
+  },
+  {
+   "title": "Using the REST Adapter with Oracle Integration 3",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-adapter/rest-adapter-capabilities.html"
+  },
+  {
+   "title": "Using the FTP Adapter with Oracle Integration 3",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/ftp-adapter/ftp-adapter-capabilities.html"
+  },
+  {
+   "title": "Using File Server in Oracle Integration 3 - FAQ",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/file-server/file-server-faq.html"
+  },
+  {
+   "title": "Using the ATP Adapter with Oracle Integration 3",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/atp-adapter/oracle-autonomous-transaction-processing-adapter-capabilities.html"
+  },
+  {
+   "title": "Using Recipes and Accelerators in Oracle Integration 3",
+   "url": "https://docs.oracle.com/en/cloud/paas/application-integration/use-recipes/learn-recipes-accelerators.html"
+  }
+ ],
+ "categories": [
+  {
+   "id": "oic-rest-api-design",
+   "name": "REST API: authentication, integrations, connections, lookups, packages",
+   "description": "Developer API for Oracle Integration 3 (base path /ic/api/integration/v1). Every call needs an OAuth bearer token and the integrationInstance query parameter.",
+   "items": [
+    {
+     "id": "oic-api-auth",
+     "name": "Developer API authentication and request URL",
+     "kind": "concept",
+     "summary": "Get an OAuth access token from the OCI IAM identity domain with the client credentials grant, then call https://<oic-host>/ic/api/... with integrationInstance=<service-instance>.",
+     "method": "POST",
+     "path": "https://<identity-domain-host>/oauth2/v1/token",
+     "keyFields": [
+      "grant_type",
+      "scope",
+      "access_token",
+      "integrationInstance"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/call-developer-apis-client-credentials.html",
+     "verified": true,
+     "notes": "OAuth is required for the Developer APIs. Create a Confidential Application in the identity domain (grant type Client credentials) and add the Oracle Integration scopes; the scope you request must match the one on the application. Oracle's examples: https://<resource-app-audience>urn:opc:resource:consumer::all (integration endpoints and Developer APIs) or https://<resource-app-audience>:443/ic/api/ (Developer APIs only). Sample token response shows expires_in 3600. <oic-host> is the design-time host (starts with 'design', e.g. design.integration.{region}.ocp.oraclecloud.com). Find the service instance name by opening the Service console URL from the instance details page; the redirected design-time URL shows integrationInstance=. With the service console URL instead, omit integrationInstance and use curl --location-trusted; runtime URLs redirect to design-time, so forward the Authorization header (curl -L). Invoking integrations needs the ServiceInvoker role; the role list for Developer API callers is on the linked 'Prerequisites for Client Credentials' page (not read in this session).",
+     "examples": [
+      {
+       "title": "Get a token (client credentials)",
+       "lang": "bash",
+       "code": "curl -i -H 'Authorization: Basic <base64(clientId:clientSecret)>' \\\n  -H 'Content-Type: application/x-www-form-urlencoded;charset=UTF-8' \\\n  --request POST https://<identity-domain-host>/oauth2/v1/token \\\n  -d 'grant_type=client_credentials&scope=<app-scope>'"
+      },
+      {
+       "title": "Call the API with the token",
+       "lang": "bash",
+       "code": "curl -X GET -H 'Authorization: Bearer '$TOKEN -H 'Accept: application/json' \\\n  'https://<oic-host>/ic/api/integration/v1/connections?integrationInstance=<service-instance>'"
+      }
+     ]
+    },
+    {
+     "id": "oic-api-integrations-list",
+     "name": "Retrieve Integrations",
+     "kind": "rest",
+     "summary": "List integrations with filters on name, status, type and style; paginate and order the results.",
+     "method": "GET",
+     "path": "/ic/api/integration/v1/integrations",
+     "keyFields": [
+      "q",
+      "orderBy",
+      "offset",
+      "limit",
+      "expand"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-integrations-get.html",
+     "verified": true,
+     "notes": "q filters: name (regex, e.g. /SC2RN/), status (ACTIVATED, CONFIGURED, INPROGRESS, FAILEDACTIVATION), type (PREBUILT, CUSTOM, DEVELOPED), style (freeform_mapmydata = app-driven orchestration, freeform_scheduled = scheduled orchestration, template_mapmydata, template_subscribetooic, template_publishtooic). Other params: orderBy=name|time, offset, limit, expand=connection|connection.adapter. Use curl -G with --data-urlencode for q. No keyword filter is documented for q.",
+     "examples": [
+      {
+       "title": "Active integrations whose name contains HCM",
+       "lang": "bash",
+       "code": "curl -G -X GET -H 'Authorization: Bearer '$TOKEN -H 'Accept: application/json' \\\n  --data-urlencode \"q={name: /HCM/, status: 'ACTIVATED'}\" -d 'orderBy=name&limit=50' \\\n  'https://<oic-host>/ic/api/integration/v1/integrations?integrationInstance=<service-instance>'"
+      }
+     ]
+    },
+    {
+     "id": "oic-api-integration-activate",
+     "name": "Activate or deactivate an integration",
+     "kind": "rest",
+     "summary": "Change an integration's status: ACTIVATED to activate, CONFIGURED to deactivate. Check progress with activationStatus and activationErrors.",
+     "method": "POST",
+     "path": "/ic/api/integration/v1/integrations/{id}",
+     "children": [
+      "activationStatus",
+      "activationErrors",
+      "clone",
+      "archive"
+     ],
+     "keyFields": [
+      "status",
+      "X-HTTP-Method-Override",
+      "enableAsyncActivationMode"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-integrations-id-post.html",
+     "verified": true,
+     "notes": "Send POST with header X-HTTP-Method-Override: PATCH. {id} is code|version URL-encoded, e.g. HELLO_WORLD%7C01.02.0000. Optional query enableAsyncActivationMode=true returns immediately. Body {\"status\":\"CONFIGURED\",\"stopScheduleForDeactivation\":\"true\"} stops a schedule while deactivating (field used in Oracle's example, not in the schema). 412 = already activated/deactivated. Activating a new version of the same code deactivates the old version. Deactivation stops new messages and pending unprocessed requests are lost. You must deactivate before editing an active integration.",
+     "examples": [
+      {
+       "title": "Activate version 01.00.0000",
+       "lang": "bash",
+       "code": "curl -X POST -H 'Authorization: Bearer '$TOKEN -H 'Content-Type: application/json' \\\n  -H 'X-HTTP-Method-Override: PATCH' -d '{\"status\":\"ACTIVATED\"}' \\\n  'https://<oic-host>/ic/api/integration/v1/integrations/HCM_WORKER_SYNC%7C01.00.0000?integrationInstance=<service-instance>'"
+      },
+      {
+       "title": "Check activation status",
+       "lang": "bash",
+       "code": "curl -X GET -H 'Authorization: Bearer '$TOKEN \\\n  'https://<oic-host>/ic/api/integration/v1/integrations/HCM_WORKER_SYNC%7C01.00.0000/activationStatus?integrationInstance=<service-instance>'"
+      }
+     ]
+    },
+    {
+     "id": "oic-api-archives",
+     "name": "Export and import packages and integrations",
+     "kind": "rest",
+     "summary": "Download a package (or a single integration) as an archive in one environment and import it into another.",
+     "method": "GET, POST, PUT",
+     "path": "/ic/api/integration/v1/packages/{packagename}/archive",
+     "children": [
+      "/packages",
+      "/packages/archive",
+      "/integrations/{id}/archive",
+      "/integrations/archive"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-packages-packagename-archive-get.html",
+     "verified": true,
+     "notes": "Package export returns a byte stream; save it with curl -o (Oracle uses a .par file name). Import (Add): POST /packages/archive as multipart/form-data with file=@...; 409 if the package already exists, so use PUT /packages/archive to replace. Integrations: GET /integrations/{id}/archive, POST (add) or PUT (replace) /integrations/archive. Packages export accepts prebuilt=true for recipe-type packages; Oracle's sample URL '?prebuilt=true?integrationInstance=' has a typo, use '&'. For project-based work in OIC 3 use project export (.CAR) instead.",
+     "examples": [
+      {
+       "title": "Export a package",
+       "lang": "bash",
+       "code": "curl -X GET -H 'Authorization: Bearer '$TOKEN -o 'hcm.pkg.par' \\\n  'https://<oic-host>/ic/api/integration/v1/packages/hcm.pkg/archive?integrationInstance=<service-instance>'"
+      },
+      {
+       "title": "Import a new package in the target",
+       "lang": "bash",
+       "code": "curl -X POST -H 'Authorization: Bearer '$TOKEN -F file=@hcm.pkg.par -F type=application/octet-stream \\\n  'https://<oic-host>/ic/api/integration/v1/packages/archive?integrationInstance=<service-instance>'"
+      }
+     ]
+    },
+    {
+     "id": "oic-api-connection-test",
+     "name": "Test a Connection",
+     "kind": "rest",
+     "summary": "Ping-test a connection by its identifier to confirm it is configured and reachable.",
+     "method": "POST",
+     "path": "/ic/api/integration/v1/connections/{id}/test",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-connections-id-test-post.html",
+     "verified": true,
+     "notes": "HTTP 200 means the connection is CONFIGURED. 404 not found, 409 not configured, 412 locked. Related: GET /connections, GET/POST /connections/{id} (update), POST /connections/{id}/validate and /testWithAttachments. Project-scoped variant: /projects/{projectId}/connections/{id}/test.",
+     "examples": [
+      {
+       "title": "Test connection HCM_CONN",
+       "lang": "bash",
+       "code": "curl -X POST -H 'Authorization: Bearer '$TOKEN -H 'Accept: application/json' \\\n  'https://<oic-host>/ic/api/integration/v1/connections/HCM_CONN/test?integrationInstance=<service-instance>'"
+      }
+     ]
+    },
+    {
+     "id": "oic-api-lookups",
+     "name": "Lookups API",
+     "kind": "rest",
+     "summary": "Create, read, update, export and import lookups (value maps used by lookupValue in the mapper).",
+     "method": "GET, POST, PUT, DELETE",
+     "path": "/ic/api/integration/v1/lookups/{name}",
+     "children": [
+      "archive",
+      "usage",
+      "clone"
+     ],
+     "keyFields": [
+      "columns",
+      "rows",
+      "row-data"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-lookups-name-get.html",
+     "verified": true,
+     "notes": "GET /lookups/{name} returns columns[] and rows[] (each row has row-data[]). Schema uses kebab-case keys while Oracle's sample response shows camelCase, so test the actual payload. Other endpoints: POST /lookups (create), PUT /lookups/{name} (update), DELETE, GET /lookups/{name}/archive (export), POST|PUT /lookups/archive (import add|replace), GET /lookups/{name}/usage. Lookup changes apply to active integrations without reactivation (may take a couple of minutes).",
+     "examples": [
+      {
+       "title": "Get lookup COUNTRY_CODES",
+       "lang": "bash",
+       "code": "curl -X GET -H 'Authorization: Bearer '$TOKEN -H 'Accept: application/json' \\\n  'https://<oic-host>/ic/api/integration/v1/lookups/COUNTRY_CODES?integrationInstance=<service-instance>'"
+      }
+     ]
+    },
+    {
+     "id": "oic-api-projects",
+     "name": "Projects and deployments API",
+     "kind": "rest",
+     "summary": "Manage OIC 3 projects: list, export/import archives, Git export/import, and project deployments; project-scoped integrations, connections, lookups and schedules live under /projects/{projectId}/.",
+     "method": "GET, POST",
+     "path": "/ic/api/integration/v1/projects",
+     "children": [
+      "/projects/{id}/archive",
+      "/projects/archive",
+      "/projects/{projectId}/deployments",
+      "/projects/{projectId}/integrations",
+      "/gitprojects"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/rest-endpoints.html",
+     "verified": true,
+     "notes": "Endpoints (from the endpoint index): GET /projects, POST /projects (create), POST /projects/{id}/archive (export), POST /projects/archive (import add), POST /gitprojects/{projectId}/exporttorepository and /importfromrepository, GET|POST /projects/{projectId}/deployments. Project export body fields listed in the schema: name, code, label ('Project Deployment'), description; Oracle gives no curl example, so test the body before scripting. Project-scoped equivalents exist for activation status, schedules (/projects/{projectId}/integrations/{id}/schedule/...) and connections test.",
+     "examples": [
+      {
+       "title": "List projects",
+       "lang": "bash",
+       "code": "curl -X GET -H 'Authorization: Bearer '$TOKEN -H 'Accept: application/json' \\\n  'https://<oic-host>/ic/api/integration/v1/projects?integrationInstance=<service-instance>'"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oic-rest-api-monitoring",
+   "name": "REST API: monitoring, error recovery and schedules",
+   "description": "Query instances and errors, resubmit or discard failed instances, and control scheduled integrations through the Developer API.",
+   "items": [
+    {
+     "id": "oic-api-monitoring-instances",
+     "name": "Retrieve Integration Instances",
+     "kind": "rest",
+     "summary": "List runtime instances (default: past hour) filtered by integration, status, time range, business identifier values or project.",
+     "method": "GET",
+     "path": "/ic/api/integration/v1/monitoring/instances",
+     "children": [
+      "{id}",
+      "{id}/activityStreamDetails",
+      "{id}/abort",
+      "{id}/replay"
+     ],
+     "keyFields": [
+      "q",
+      "timewindow",
+      "businessIDValue",
+      "return",
+      "fields"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-monitoring-instances-get.html",
+     "verified": true,
+     "notes": "q options: timewindow (1h, 6h, 1d, 2d, 3d, RETENTIONPERIOD; default 1h), code, version, status (COMPLETED, FAILED, ABORTED), startdate/enddate (UTC, within the 32-day retention period), primaryValue, secondaryValue, businessIDValue (exact match '[value]'), instanceId, requestId (scheduled only), parentInstanceId (child instances), projectCode, integration-style (appdriven|scheduled), includePurged. return=metadataminimal|metadata|minimal|summary for lighter responses; fields=runId|id|all; orderBy=lastupdateddate|creationdate|executiontime. Per-instance: GET /monitoring/instances/{id}, /activityStreamDetails (activityStream is deprecated), POST /monitoring/instances/{id}/abort.",
+     "examples": [
+      {
+       "title": "Failed instances of one integration in the last day",
+       "lang": "bash",
+       "code": "curl -G -X GET -H 'Authorization: Bearer '$TOKEN -H 'Accept: application/json' \\\n  --data-urlencode \"q={code: 'HCM_WORKER_SYNC', status: 'FAILED', timewindow: '1d'}\" \\\n  'https://<oic-host>/ic/api/integration/v1/monitoring/instances?integrationInstance=<service-instance>'"
+      }
+     ]
+    },
+    {
+     "id": "oic-api-monitoring-errors",
+     "name": "Retrieve Errored Instances",
+     "kind": "rest",
+     "summary": "List errored instances (default: past hour) with filters for recoverability, error text, connection and project.",
+     "method": "GET",
+     "path": "/ic/api/integration/v1/monitoring/errors",
+     "keyFields": [
+      "q",
+      "recoverable",
+      "groupBy",
+      "expand"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-monitoring-errors-get.html",
+     "verified": true,
+     "notes": "q options include timewindow, code, version, startdate/enddate, id, primaryValue, businessIDValue, errorMessage, errorDetails, recoverable (true|false), connectionCode, projectCode, integration-style, includePurged. groupBy=messages|integration|connection; expand=integration|connection; return=minimal for speed. Oracle's 'combine parameters' sample has a missing quote ({timewindow: '3d}); quote values correctly.",
+     "examples": [
+      {
+       "title": "Recoverable errors in the last 6 hours grouped by integration",
+       "lang": "bash",
+       "code": "curl -G -X GET -H 'Authorization: Bearer '$TOKEN -H 'Accept: application/json' \\\n  --data-urlencode \"q={timewindow: '6h', recoverable: 'true'}\" -d 'groupBy=integration' \\\n  'https://<oic-host>/ic/api/integration/v1/monitoring/errors?integrationInstance=<service-instance>'"
+      }
+     ]
+    },
+    {
+     "id": "oic-api-resubmit",
+     "name": "Resubmit or discard errored instances",
+     "kind": "rest",
+     "summary": "Resubmit one errored instance or a list of instance IDs; discard instances you will not recover.",
+     "method": "POST",
+     "path": "/ic/api/integration/v1/monitoring/errors/resubmit",
+     "children": [
+      "/monitoring/errors/{id}/resubmit",
+      "/monitoring/errors/recoveryJobs/{id}",
+      "/monitoring/errors/{id}/discard",
+      "/monitoring/errors/discard"
+     ],
+     "keyFields": [
+      "ids",
+      "recovery-job-id",
+      "non-recoverable-ids"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-monitoring-errors-resubmit-post.html",
+     "verified": true,
+     "notes": "Bulk: POST /monitoring/errors/resubmit with {\"ids\":[...]} returns 202 with recovery-job-id, accepted-ids, non-recoverable-ids, invalid-ids; track with GET /monitoring/errors/recoveryJobs/{id}. Single: POST /monitoring/errors/{id}/resubmit; body may set \"recoveryTraceLevel\":\"Audit\". Rules (Resubmit Failed Messages page): asynchronous flows are recoverable; synchronous flows and scheduled flows with schedule parameters are not; maximum ten resubmissions per instance; resubmission is manual; a discarded message cannot be resubmitted. Discard: POST /monitoring/errors/{id}/discard or /monitoring/errors/discard.",
+     "examples": [
+      {
+       "title": "Bulk resubmit",
+       "lang": "bash",
+       "code": "curl -X POST -H 'Authorization: Bearer '$TOKEN -H 'Content-Type: application/json' -d '{\"ids\":[\"19\",\"20\",\"21\"]}' \\\n  'https://<oic-host>/ic/api/integration/v1/monitoring/errors/resubmit?integrationInstance=<service-instance>'"
+      }
+     ]
+    },
+    {
+     "id": "oic-api-schedules",
+     "name": "Scheduled integration control",
+     "kind": "rest",
+     "summary": "Start, stop, pause or resume a schedule, run a scheduled integration now with parameter values, and update stored schedule parameters.",
+     "method": "POST, PATCH",
+     "path": "/ic/api/integration/v1/integrations/{id}/schedule/{start|stop|pause|resume|jobs}",
+     "keyFields": [
+      "action",
+      "parameters",
+      "async",
+      "retry"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-integrations-id-schedule-start-post.html",
+     "verified": true,
+     "notes": "POST /integrations/{id}/schedule/start (query async=true, retry=true for a schedule stuck in STARTING), /stop, /pause, /resume. Run now: POST /integrations/{id}/schedule/jobs with {\"action\":\"NOW\"} and optional \"parameters\":[{\"name\":...,\"value\":...}]; returns 204 with no body. PATCH /integrations/{id}/schedule/parameters updates stored values. GET /monitoring/futureruns lists upcoming runs. GET|POST|PUT /integrations/{id}/schedule reads, adds or updates the schedule definition.",
+     "examples": [
+      {
+       "title": "Run now with a parameter override",
+       "lang": "bash",
+       "code": "curl -X POST -H 'Authorization: Bearer '$TOKEN -H 'Content-Type: application/json' \\\n  -d '{\"action\":\"NOW\",\"parameters\":[{\"name\":\"lastProcessedDocumentID\",\"value\":\"0\"}]}' \\\n  'https://<oic-host>/ic/api/integration/v1/integrations/HCM_EXTRACT_SFTP%7C01.00.0000/schedule/jobs?integrationInstance=<service-instance>'"
+      },
+      {
+       "title": "Stop the schedule",
+       "lang": "bash",
+       "code": "curl -X POST -H 'Authorization: Bearer '$TOKEN \\\n  'https://<oic-host>/ic/api/integration/v1/integrations/HCM_EXTRACT_SFTP%7C01.00.0000/schedule/stop?integrationInstance=<service-instance>'"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oic-adapters-fusion",
+   "name": "Oracle ERP Cloud and HCM Cloud adapters",
+   "description": "Native adapters for Fusion Applications: REST/SOAP calls, bulk import (FBDI, HDL), HCM Extract retrieval, Atom feeds, business events and callbacks.",
+   "items": [
+    {
+     "id": "oic-erp-adapter",
+     "name": "Oracle ERP Cloud Adapter",
+     "kind": "oic",
+     "summary": "Invoke Fusion ERP/SCM REST resources and SOAP services, run FBDI bulk imports, upload files to UCM, and trigger integrations from business events or FBDI callbacks.",
+     "children": [
+      "Query, Create, Update, or Delete Information",
+      "Import Bulk Data into Oracle ERP Cloud",
+      "Send Files to ERP Cloud"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/erp-adapter/oracle-erp-cloud-adapter-capabilities.html",
+     "verified": true,
+     "notes": "Invoke actions: 'Query, Create, Update, or Delete Information', 'Import Bulk Data into Oracle ERP Cloud', 'Send Files to ERP Cloud' (UCM upload; Security Group, Doc Account, Encrypt the File). Downloading from WebCenter Content is not supported. You cannot run SQL with the adapter; build a BI Publisher report in Fusion and invoke it. Custom business events can be created and subscribed. Security policies: Username Password Token (with or without PGP key support), OAuth Authorization Code Credentials, OAuth using JWT User Assertion. ErpIntegrationService, ErpObjectAttachmentService and GenericSOAPService support MTOM by default for new connections from release 25.02."
+    },
+    {
+     "id": "oic-erp-fbdi-import",
+     "name": "Import Bulk Data into Oracle ERP Cloud (FBDI)",
+     "kind": "fbdi",
+     "summary": "Submit a File-Based Data Import job: OIC uploads a ZIP (CSV data file plus job properties/manifest file) and Fusion loads the interface tables and runs the import.",
+     "children": [
+      "Select Bulk Data Import Process",
+      "Job Property File",
+      "Extract File",
+      "Enable Callback"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/erp-adapter/invoke-file-based-data-import-fbdi-job.html",
+     "verified": true,
+     "notes": "Wizard: Actions page = Import Bulk Data into Oracle ERP Cloud; Operations page fields = Select Bulk Data Import Process, Reuse job property file uploaded separately in respective UCM account, Job Property File, Extract File; Response page = Enable Callback. New integrations use the ErpImportBulkDataEvent business event, so the Integration Flow Identifier and Version fields are gone; older callback integrations still set them manually. Check the Financials File-Based Data Imports list to confirm a job is FBDI. Oracle points to Support doc 2102800.1 (External Data Integration Services) for ZIP and properties details. A GENERIC error on selecting the action has its own troubleshooting topic."
+    },
+    {
+     "id": "oic-erp-fbdi-callback",
+     "name": "FBDI completion callback integration",
+     "kind": "oic",
+     "summary": "A separate trigger integration that Fusion invokes when the FBDI load/import job finishes, whether it succeeded or failed.",
+     "children": [
+      "ErpImportBulkDataEvent"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/erp-adapter/configure-callbacks.html",
+     "verified": true,
+     "notes": "Trigger option on the Request page: 'Receive Callback Message upon completion of FBDI bulk import job submitted via another integration'; then select the bulk import process. Event subscription happens automatically on activation. Multiple callback integrations for the same FBDI job are supported (separate topic). The callback payload fields are not described on this page; inspect the generated schema in the mapper."
+    },
+    {
+     "id": "oic-hcm-adapter",
+     "name": "Oracle HCM Cloud Adapter",
+     "kind": "oic",
+     "summary": "Call HCM REST resources and SOAP services, subscribe to Atom feeds, load data with HCM Data Loader, retrieve HCM Extract output and upload files to UCM.",
+     "children": [
+      "Query, Create, Update, or Delete Information",
+      "Subscribe to Updates (via Atom Feed)",
+      "Import Bulk Data using HCM Data Loader (HDL)",
+      "Receive Files from HCM Cloud",
+      "Send Files to HCM Cloud"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/hcm-adapter/invoke-action-page.html",
+     "verified": true,
+     "notes": "Invoke actions (exact labels): 'Query, Create, Update, or Delete Information', 'Subscribe to Updates (via Atom Feed)', 'Import Bulk Data using HCM Data Loader (HDL)', 'Receive Files from HCM Cloud', 'Send Files to HCM Cloud'. For REST get operations only expand, fields and onlyData query parameters are supported. Send Files: Security Group default FAFusionImportExport, Doc Account, Encrypt the File. Selecting a parent resource without choosing children pulls all children into the WSDL and can cause memory issues. Security policies match the ERP adapter. Downloading from UCM is not supported."
+    },
+    {
+     "id": "oic-hcm-hdl",
+     "name": "Import Bulk Data using HCM Data Loader (HDL)",
+     "kind": "hdl",
+     "summary": "Submit an HDL .dat file to Fusion HCM and get back a process ID, then query the job status.",
+     "children": [
+      "Submit an HCM Data Loader job",
+      "Query the Status of an HCM Data Loader Job"
+     ],
+     "keyFields": [
+      "Process ID",
+      "Security Group",
+      "Doc Account"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/hcm-adapter/invoke-operation-page.html",
+     "verified": true,
+     "notes": "Operations: 'Submit an HCM Data Loader job' uploads the HDL-compliant .dat file to WebCenter Content as a ZIP and calls importAndLoad, returning a process ID; fields Security Group, Doc Account, HCM Data Loader (HDL) File Encryption (None or PGP Unsigned). 'Query the Status of an HCM Data Loader Job' calls getDataSetStatus (spelled getDataSetStaus on the page). Oracle's pattern maps Attachment Reference to File Reference and Process ID to the response. Status values beyond 'started' are not listed; inspect the response schema before writing polling conditions.",
+     "examples": [
+      {
+       "title": "Typical flow (design outline)",
+       "lang": "text",
+       "code": "REST trigger (multipart, .dat attachment)\n  -> HCM adapter: Import Bulk Data using HCM Data Loader (HDL) / Submit an HCM Data Loader job\n     map: Attachment Reference -> File Reference\n  -> while (status not final): Wait 60s -> HCM adapter: Query the Status of an HCM Data Loader Job\n  -> Notification on failure"
+      }
+     ]
+    },
+    {
+     "id": "oic-hcm-extract",
+     "name": "Receive Files from HCM Cloud (HCM Extract)",
+     "kind": "extract",
+     "summary": "Download the latest HCM Extract output delivered to WebCenter Content into OIC, optionally decrypt and unzip it, and process it with Stage File.",
+     "children": [
+      "What is the Integration Name for HCM Extracts",
+      "Decrypt the extract",
+      "Unzip the extract"
+     ],
+     "keyFields": [
+      "lastProcessedDocumentID",
+      "ICSFile",
+      "filename",
+      "directory"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/hcm-adapter/sample-integration-flow-demonstrate-extract-bulk-data-option.html",
+     "verified": true,
+     "notes": "Prerequisite: the extract must deliver to WebCenter Content and have a unique Integration Name, which you enter in 'What is the Integration Name for HCM Extracts'. Optional 'Specify release date-time of extract', 'Decrypt the extract', 'Unzip the extract'. Oracle's pattern stores lastProcessedDocumentID in a schedule parameter (initial 0), maps it into the request, reads the file with Stage File Read File in Segments using the extract schema exported from HCM, then assigns the new Document ID back to the schedule parameter. Response path for file name: $getFile/.../GetFileResponse/HcmDataExtractResponse/ICSFile/Properties/filename (directory alongside)."
+    },
+    {
+     "id": "oic-hcm-atom",
+     "name": "Subscribe to Updates (via Atom Feed)",
+     "kind": "atom",
+     "summary": "Poll HCM Atom feeds from a scheduled integration to pick up new hires, assignment changes, terminations and other changes.",
+     "children": [
+      "EmployeeNewHireFeed",
+      "EmployeeUpdateFeed",
+      "EmployeeTerminationFeed",
+      "EmployeeAssignmentFeed"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/hcm-adapter/invoke-operation-page.html",
+     "verified": true,
+     "notes": "Feeds offered: PositionFeed, JobFeed, LocationFeed, OrganizationFeed, GradeFeed, EmployeeUpdateFeed, EmployeeNewHireFeed, EmployeeAssignmentFeed, EmployeeTerminationFeed, EmployeeWorkRelUpdateFeed, EmployeeWorkRelCancelFeed. Options: Max entries to process; Process Future Dated Entries Immediately (mapper shows published-min instead of updated-min); Include Business Object in ATOM Feeds (one extra request per entry, fixed max 1000 entries via page-size). Must run in a schedule integration. See the troubleshooting topic on missing entries when paging."
+    }
+   ]
+  },
+  {
+   "id": "oic-adapters-tech",
+   "name": "REST, file, database and OCI-native connectivity",
+   "description": "REST trigger/invoke, FTP and File adapters, ATP adapter, OIC File Server, Stage File action and the native OCI Object Storage and OCI Function actions.",
+   "items": [
+    {
+     "id": "oic-rest-trigger",
+     "name": "REST Adapter as trigger",
+     "kind": "oic",
+     "summary": "Expose an integration as a REST API (GET, PUT, POST, DELETE, PATCH) with JSON, XML, binary, form-encoded or multipart payloads.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-adapter/rest-adapter-capabilities.html",
+     "verified": true,
+     "notes": "Protected by HTTP Basic, OAuth token and JWT authentication over HTTPS; callers need the ServiceInvoker role (Oracle recommends OAuth over Basic). Multiple resources/verbs in one integration become pick branches. CORS and Swagger 2.0 document generation supported; the Summary page shows a sample cURL. Oversized structured payloads return 413 Request entity too large (limits are in Service Limits). Private endpoints are not supported for trigger connections.",
+     "examples": [
+      {
+       "title": "Invoke an integration endpoint with OAuth",
+       "lang": "bash",
+       "code": "curl -X POST -H 'Authorization: Bearer '$TOKEN -H 'Content-Type: application/json' \\\n  -d '{\"personNumber\":\"1001\"}' https://<oic-runtime-host>/<integration-endpoint-path>"
+      }
+     ]
+    },
+    {
+     "id": "oic-rest-invoke",
+     "name": "REST Adapter as invoke",
+     "kind": "oic",
+     "summary": "Call external REST APIs described by OpenAPI/Swagger/RAML or by a sample JSON/XML, with many security policies.",
+     "keyFields": [
+      "Security policy",
+      "Endpoint",
+      "Dynamic endpoint"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/rest-adapter/rest-adapter-capabilities.html",
+     "verified": true,
+     "notes": "Security policies include HTTP Basic, OAuth Client Credentials, OAuth Resource Owner Password Credentials, OAuth Authorization Code, OAuth custom two/three-legged, OAuth 1.0a, AWS Signature V4, OCI Signature Version 1, JWT client/user assertion, OCI Service Invocation (RPST) and Unprotected. Dynamic endpoints and dynamic connections supported. Response attachments up to 1 GB. By default three automatic retries on HTTP 504 for synchronous invokes (can be disabled). Private endpoint and connectivity agent (mTLS) options for non-public APIs."
+    },
+    {
+     "id": "oic-ftp-file-adapters",
+     "name": "FTP Adapter and File Adapter",
+     "kind": "oic",
+     "summary": "FTP Adapter reads, writes, lists, moves, deletes and downloads files on FTP, FTPS and SFTP servers (including OIC File Server); File Adapter writes files on directories local to a connectivity agent.",
+     "children": [
+      "Read a File",
+      "Write File",
+      "List Files",
+      "Move a File",
+      "Delete a File",
+      "Download File"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/ftp-adapter/invoke-operations-page.html",
+     "verified": true,
+     "notes": "FTP operations: Read a File, Write File (Append to Existing File, PGP Encryption/Decryption, Sign/Verify), List Files (File Name Pattern, Exclude pattern, Max Files, Minimum Age, recursive, descending), Move a File (Overwrite), Delete a File, Download File (+Download Directory for Stage File; unzip, PGP decrypt, verify). Appending JSON/XML produces invalid files and record-by-record appends are slow. Nonschema polling files up to 1 GB; SFTP keys in PEM, FTPS certificates in PKCS12; non-public servers need the connectivity agent or a private endpoint. The File Adapter needs the connectivity agent (Oracle recommends 'Use a Single Agent at a Time' from 24.10)."
+    },
+    {
+     "id": "oic-atp-adapter",
+     "name": "Oracle Autonomous Transaction Processing (ATP) Adapter",
+     "kind": "oic",
+     "summary": "Poll tables for new or changed rows and invoke SQL statements, stored procedures and table operations on Autonomous Transaction Processing.",
+     "children": [
+      "Run a SQL Statement",
+      "Invoke a Stored Procedure",
+      "Perform an Operation on a Table",
+      "Polling trigger"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/atp-adapter/oracle-autonomous-transaction-processing-adapter-capabilities.html",
+     "verified": true,
+     "notes": "Invoke: Run a SQL Statement, Invoke a Stored Procedure (PL/SQL record/table types supported), Perform an Operation on a Table (Select, Insert, Update, Delete; multiple records per request), Select AI for SQL, AI Vector Search. Polling with distributed polling and multithreading. Bulk data import from Object Storage works only with direct connectivity (no agent), ATP-Serverless and CSV. Connections use the credentials wallet (download it first); private-endpoint ATP needs a private gateway or the connectivity agent."
+    },
+    {
+     "id": "oic-file-server",
+     "name": "OIC File Server and the File server action",
+     "kind": "oic",
+     "summary": "Built-in SFTP server for each OIC instance, reachable from external SFTP clients, from the FTP Adapter, or from the native File server action.",
+     "children": [
+      "List directory",
+      "Write File",
+      "Move File",
+      "Get File Reference",
+      "Delete File"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/interact-files-file-server.html",
+     "verified": true,
+     "notes": "An administrator must enable File Server once in the OCI Console. File server action operations: List directory (Max Files up to 1000, pattern, Minimum Age, recursive, Sort By), Write File, Move File (Overwrite File), Get File Reference, Delete File. From integrations (FTP Adapter or action) the file limit is 1 GB; SFTP clients can move any size within storage. 500 GB default storage; writes fail when full. Max 50 connections per instance. Auth: password, OpenSSH key, or both. Public IP and port shown on Settings cannot be changed. The File Adapter cannot connect to File Server."
+    },
+    {
+     "id": "oic-stage-file",
+     "name": "Stage File action",
+     "kind": "oic",
+     "summary": "Process files inside an integration's temporary storage: read whole or in segments, write, zip, unzip, encrypt, decrypt and list files.",
+     "children": [
+      "Read Entire File",
+      "Read File in Segments",
+      "Write File",
+      "Zip File",
+      "Unzip File",
+      "Encrypt File",
+      "Decrypt File",
+      "List File"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/process-files-scheduled-integrations-stage-file-action.html",
+     "verified": true,
+     "notes": "Operations: Read Entire File (< 10 MB), Read File in Segments (default 200 records; Oracle recommends 2000 in OIC 3; opaque or JSON schemas not supported), Write File (no built-in header; repeated appends to the same file in a loop can overwrite data), Zip File, Unzip File (.zip only; .gz not supported), Encrypt/Decrypt File (up to 1 GB; input and output paths must differ), List File (pattern, recursive). Accepts file references from REST attachments/stream references, SOAP MTOM and the FTP Adapter. Files uploaded through the connectivity agent can only be read/unzipped via file reference. Do not use '#' in schema names. Local stage files are deleted when the integration leaves their scope."
+    },
+    {
+     "id": "oic-oci-object-storage-action",
+     "name": "OCI Object Storage action",
+     "kind": "oic",
+     "summary": "Call OCI Object Storage natively (no REST connection): create/list/delete buckets and upload, download, list and delete objects.",
+     "children": [
+      "Create bucket",
+      "List buckets",
+      "Delete bucket",
+      "Upload object",
+      "Download object",
+      "Delete object",
+      "List objects"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/invoke-object-storage-oci-object-storage-action.html",
+     "verified": true,
+     "notes": "Needs an identity-domain tenancy, a dynamic group with rule resource.id = '<OIC OAuth client ID>' and a policy; Oracle's example is 'Allow dynamic-group <dg> to inspect compartments in compartment <c>' and it points to Securing Object Storage for finer object permissions. Upload/download limit in the action is 1 GB. Download returns a stream reference: use encodeReferenceToBase64 then decodeBase64 to get text. No cross-tenancy calls (use REST Adapter with OCI Signature Version 1). Override compartment/bucket in the mapper per environment instead of re-running the wizard."
+    },
+    {
+     "id": "oic-oci-function-action",
+     "name": "OCI Function action",
+     "kind": "oic",
+     "summary": "Invoke an OCI Functions function directly from an integration (for example signatures, custom compression, PDF parsing).",
+     "keyFields": [
+      "Region",
+      "Compartment",
+      "Application",
+      "Function",
+      "Function Override"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/invoke-oracle-cloud-infrastructure-functions-directly-from-integration-oci-function-action.html",
+     "verified": true,
+     "notes": "Requires identity domains, a dynamic group (resource.id = '<OIC OAuth client ID>') and a policy such as 'Allow dynamic-group <dg> to use functions-family in compartment <c>' (prefix identity_domain/ when not in the default domain). Wizard: Region, Compartment, Application, Function; request/response as JSON sample, XML schema/sample, or Binary. Text to binary: decodeBase64ToReference(encodeBase64(Name)); binary to text: decodeBase64(encodeReferenceToBase64(StreamReference)). Override the Function URI in the mapper (Function Override) when promoting between environments."
+    }
+   ]
+  },
+  {
+   "id": "oic-actions-flow",
+   "name": "Orchestration: flow control and fault handling",
+   "description": "Actions that structure an orchestration: scopes and fault handlers, loops, branching, waits and calls to child integrations.",
+   "items": [
+    {
+     "id": "oic-scope",
+     "name": "Scope action and fault handlers",
+     "kind": "oic",
+     "summary": "Group actions and invokes with their own fault handlers so a failure can be caught, logged and handled without failing the whole flow.",
+     "children": [
+      "Default Handler",
+      "Named faults",
+      "Re-throw Fault"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/manage-group-actions-scope-action.html",
+     "verified": true,
+     "notes": "Each scope has a Default Handler; adding an invoke adds its named faults (e.g. APIInvocationError for REST) to the handler. Variables created inside a scope are not visible outside; copy them to a variable declared before the scope. Unlimited nesting, even inside fault handlers. Connectivity-agent invokes do not process named fault handlers; handle everything in the default handler. Re-throw Fault can only be placed inside a scope's fault handler. If the handler succeeds, processing continues after the scope."
+    },
+    {
+     "id": "oic-global-fault",
+     "name": "Global fault handling",
+     "kind": "oic",
+     "summary": "Integration-level handler that runs when any unhandled failure occurs; send business faults back to the caller or apply logic before the error framework records the failure.",
+     "keyFields": [
+      "$GlobalFaultObject",
+      "errorCode",
+      "reason",
+      "details"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/add-global-faults-orchestrated-integrations.html",
+     "verified": true,
+     "notes": "The trigger is connected to a Re-throw Fault action by default; Re-throw sends details to the error handling framework (instance shows as errored and can be resubmitted if recoverable) and does not reply to the trigger. Use Switch + Stop to end quietly for some faults. $GlobalFaultObject/fault exposes errorCode, reason, details. Expression Builder functions here: getFaultAsString, getFaultAsXML, getFaultName, getFaultedActionName, getFlowId, lookupValue. If the handler handles the error, the instance shows as Succeeded."
+    },
+    {
+     "id": "oic-throw-new-fault",
+     "name": "Throw New Fault action",
+     "kind": "oic",
+     "summary": "Raise your own fault (for example on a business validation failure) so it is caught by a scope or global fault handler.",
+     "keyFields": [
+      "Code",
+      "Reason",
+      "Details",
+      "Skip Condition"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/throw-errors-throw-new-fault-action.html",
+     "verified": true,
+     "notes": "Fields: Code (mandatory), Reason, Details, Skip Condition (prevents throwing when true). Place it at the end of a block (for-each, switch branch, etc.); nothing can be dropped after it in that block. With a skip condition the connector line is solid (flow may continue)."
+    },
+    {
+     "id": "oic-for-each",
+     "name": "For-Each action",
+     "kind": "oic",
+     "summary": "Loop over a repeating element (records, file list) and run actions per item.",
+     "keyFields": [
+      "Repeating Element",
+      "Current Element Name",
+      "Process items in parallel"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/loop-over-repeating-elements-each-action.html",
+     "verified": true,
+     "notes": "Fields: Repeating Element, Current Element Name (alias). Process items in parallel and Enable Retry (up to three retries) appear only in schedule integrations; with parallel, degree of parallelism is set to 1 for shared variables and the last updated value survives. The element must be repetitive, scalar-typed and qualified, and its parents must not repeat; nest loops for child lists. A Stop action inside for-each ends the whole integration on the first pass. Prefer local over global variables inside loops."
+    },
+    {
+     "id": "oic-while",
+     "name": "While action",
+     "kind": "oic",
+     "summary": "Repeat actions or invokes while a condition is true, for example paging through an API or polling a job status.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/loop-over-actions-or-invoke-connections-while-condition-is-satisfied-while-action.html",
+     "verified": true,
+     "notes": "Condition built in the Expression Builder (Value, operator, Value; number, string or boolean variables). Oracle's example loops while a counter <= 10000 with Assign/Logger inside. No iteration cap is stated, so always change the condition variable inside the loop and add a Wait when polling.",
+     "examples": [
+      {
+       "title": "Polling condition (Developer view)",
+       "lang": "xpath",
+       "code": "$jobStatus != 'COMPLETED' and $attempts < 30"
+      }
+     ]
+    },
+    {
+     "id": "oic-switch",
+     "name": "Switch action",
+     "kind": "oic",
+     "summary": "Route processing to the first branch whose condition is true, with an Otherwise branch.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/route-expressions-switch-actions-branches.html",
+     "verified": true,
+     "notes": "New switch has Route 1 and Otherwise; add branches from the action menu. Only the first true branch runs. XPath 2.0 functions and boolean-returning functions are supported in conditions; non-boolean functions are not. Nested switches allowed.",
+     "examples": [
+      {
+       "title": "Branch condition",
+       "lang": "xpath",
+       "code": "$fileType = 'json'"
+      }
+     ]
+    },
+    {
+     "id": "oic-wait",
+     "name": "Wait action",
+     "kind": "oic",
+     "summary": "Pause processing for a number of seconds, e.g. between status polls.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/delay-integration-execution-specified-time-period-wait-action.html",
+     "verified": true,
+     "notes": "Literal value in seconds with no stated upper limit, but the wait cannot exceed the integration's total running time. Usable in schedule, asynchronous, synchronous and fire-and-forget integrations. An XPath-based wait can read an integration property that you change after activation (Actions > Update property values) without reactivating."
+    },
+    {
+     "id": "oic-integration-action",
+     "name": "Integration action (invoke child integration)",
+     "kind": "oic",
+     "summary": "Call another active, co-located integration locally, including schedule integrations (Submit Now).",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/invoke-co-located-integration-from-parent-integration-oic.html",
+     "verified": true,
+     "notes": "Available children: active sync-sync, async without callback, and schedule integrations; async-with-callback, draft and deactivated ones are hidden. In projects you see all integrations of the current project and only public ones of other projects ('Not in Project' for global). File references (stage files) cannot be passed between parent and child; send attachments instead (not supported for SOAP/REST children from a parent). REST children must accept JSON. Child instances can be found with q parentInstanceId."
+    }
+   ]
+  },
+  {
+   "id": "oic-actions-data",
+   "name": "Orchestration: data, utility actions and schedules",
+   "description": "Variables, payload building, notifications, logging, JavaScript and schedule parameters.",
+   "items": [
+    {
+     "id": "oic-assign",
+     "name": "Assign action",
+     "kind": "oic",
+     "summary": "Set scalar (string) variables, or append/clear fault lists in schedule integrations.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/assign-values-scalar-variables-assign-action.html",
+     "verified": true,
+     "notes": "Types: String, and Fault (Append/Clear, schedule integrations only, for parallel fault aggregation). Complex types are not supported (use Data Stitch). Enter literal strings in single quotes. Variables created in scopes or loops are not visible outside; assign them to a global variable declared earlier. Tracking variables are strings; the primary tracking variable cannot be reassigned mid-flow.",
+     "examples": [
+      {
+       "title": "Literal value",
+       "lang": "xpath",
+       "code": "'PENDING'"
+      }
+     ]
+    },
+    {
+     "id": "oic-data-stitch",
+     "name": "Data Stitch action",
+     "kind": "oic",
+     "summary": "Build or patch complex payloads incrementally with Assign, Append and Remove operations.",
+     "children": [
+      "Assign",
+      "Append",
+      "Remove"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/build-complex-assignments-stitch-action.html",
+     "verified": true,
+     "notes": "Supports scalar and complex variables, arrays and partial or full payloads (the mapper always replaces the full target). Append adds to the end of a repeating element; Assign overwrites the target; Remove deletes the target (all repeats unless an index/predicate is given). Statement order matters (copy address, then override street)."
+    },
+    {
+     "id": "oic-notification",
+     "name": "Notification action",
+     "kind": "oic",
+     "summary": "Send an email (To, From, Subject, HTML body with {parameters}, attachments) during the integration.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/send-notification-emails-during-stages-integration-notification-action.html",
+     "verified": true,
+     "notes": "Total size including attachments is 1 MB for Oracle Integration 3. From must be an approved sender (Settings > Notifications) or it defaults to no-reply@mail.integration.{region}.ocp.oraclecloud.com. Attachments can come from REST attachments, Stage File write and FTP download references. The action is asynchronous and never fails the instance, so check the action in the instance if mail does not arrive.",
+     "examples": [
+      {
+       "title": "Subject expression",
+       "lang": "xpath",
+       "code": "concat('OIC errors: ', $errorCount)"
+      },
+      {
+       "title": "Body with parameter",
+       "lang": "xml",
+       "code": "<html><body><p>Integration <strong>{name}</strong> failed.</p></body></html>"
+      }
+     ]
+    },
+    {
+     "id": "oic-logger",
+     "name": "Logger action",
+     "kind": "oic",
+     "summary": "Write a static or expression-built message to the activity stream and diagnostic logs.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/log-payload-details-log-action.html",
+     "verified": true,
+     "notes": "Choose Always or 'When tracing level is set to Audit' (tracing is set when you activate). View in Observability > Instances > activity stream; Download gives a zip with the log messages. Avoid logging personal data in production.",
+     "examples": [
+      {
+       "title": "Message",
+       "lang": "xpath",
+       "code": "concat('Processing person ', $currentPerson/PersonNumber)"
+      }
+     ]
+    },
+    {
+     "id": "oic-javascript",
+     "name": "JavaScript action and libraries",
+     "kind": "oic",
+     "summary": "Register JavaScript libraries (.js, .jar, or .zip with JAR + metadata XML) and call their functions from the JavaScript action or the mapper for small data enrichment.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/add-javascript-action.html",
+     "verified": true,
+     "notes": "Timeout 15 seconds per function. No outbound calls, network, disk, file, Java or thread APIs. Name the return variable (var retValue...; return retValue;) or the return parameter will not appear for type configuration; nested functions are not exposed. Built-in helpers shown by Oracle: oic.uuid.uuidv4(), oic.date.timeZoneOffset(dateTime, fromZone, toZone). Libraries are shared resources in projects.",
+     "examples": [
+      {
+       "title": "Library function with named return",
+       "lang": "js",
+       "code": "function toUpperTrim(value) {\n  var retValue = String(value).trim().toUpperCase();\n  return retValue;\n}"
+      },
+      {
+       "title": "UUID helper",
+       "lang": "js",
+       "code": "function newId() {\n  var id = oic.uuid.uuidv4();\n  return id;\n}"
+      }
+     ]
+    },
+    {
+     "id": "oic-schedule-parameters",
+     "name": "Schedule parameters",
+     "kind": "oic",
+     "summary": "Scalar values stored with a schedule integration that persist between runs (e.g. last processed ID or timestamp).",
+     "keyFields": [
+      "Default Value",
+      "Current value",
+      "New value"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/create-update-parameters-scheduled-integrations.html",
+     "verified": true,
+     "notes": "Up to five parameters; values cannot exceed 256 characters. Update them with an Assign action and the new value becomes the current value for the next run. Override at run time (Ad hoc request or Start schedule) or via REST schedule/jobs and PATCH schedule/parameters; precedence is new value, then current, then design-time default. An Assign using a parameter inside a for-each switched to parallel shows an error. Scheduled flows with schedule parameters are not recoverable by resubmit."
+    }
+   ]
+  },
+  {
+   "id": "oic-mapper-functions",
+   "name": "Mapper, XPath and XSLT",
+   "description": "Documented function usage in the OIC mapper and Expression Builder. Use only functions visible in the mapper's Functions palette.",
+   "items": [
+    {
+     "id": "oic-xp20-format-datetime",
+     "name": "xp20:format-dateTime",
+     "kind": "xslt",
+     "summary": "Format a dateTime with an XSLT 2.0 picture string, e.g. to get a fixed number of fractional digits or a 'YYYY-MM-DD HH:MM:SS' string.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/mapper-user/function-current-datetime-is-not-returning-same-number-digits-all-timestamp-values.html",
+     "verified": true,
+     "notes": "fn:current-dateTime() can return a variable number of fractional digits; wrap it in xp20:format-dateTime for a stable format. The same picture syntax formats source fields (pass the source element instead of fn:current-dateTime()). Oracle's month-name example '[MNn' is missing its closing bracket; use '[MNn]'.",
+     "examples": [
+      {
+       "title": "Fixed milliseconds",
+       "lang": "xpath",
+       "code": "xp20:format-dateTime(fn:current-dateTime(), \"[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001]\")"
+      },
+      {
+       "title": "Standard timestamp",
+       "lang": "xpath",
+       "code": "xp20:format-dateTime(string(fn:current-dateTime()), \"[Y0001]-[M01]-[D01] [H01]:[m01]:[s01]\")"
+      }
+     ]
+    },
+    {
+     "id": "oic-date-arithmetic",
+     "name": "Date arithmetic, time zones and epoch",
+     "kind": "xslt",
+     "summary": "Add or subtract durations, convert time zones and convert to/from epoch seconds with standard XPath 2.0 functions.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/mapper-user/perform-date-conversions-mapper.html",
+     "verified": true,
+     "notes": "Durations: xsd:dayTimeDuration('P10D'), xsd:yearMonthDuration('P1Y'). Convert an xsd:date (YYYY-MM-DD) first with xsd:dateTime(concat($d,'T00:00:00')). Time zone: fn:adjust-dateTime-to-timezone(dateTime, xsd:dayTimeDuration('PT5H30M')); 'PT0H' gives UTC.",
+     "examples": [
+      {
+       "title": "Ten days ago",
+       "lang": "xpath",
+       "code": "fn:current-dateTime() - xsd:dayTimeDuration('P10D')"
+      },
+      {
+       "title": "IST to GMT",
+       "lang": "xpath",
+       "code": "fn:adjust-dateTime-to-timezone(xsd:dateTime('2021-05-20T10:49:07.859+05:30'), xsd:dayTimeDuration('PT0H'))"
+      },
+      {
+       "title": "Now as epoch seconds",
+       "lang": "xpath",
+       "code": "(fn:current-dateTime() - xsd:dateTime('1970-01-01T00:00:00')) div xsd:dayTimeDuration('PT1S')"
+      }
+     ]
+    },
+    {
+     "id": "oic-dvm-lookupvalue",
+     "name": "dvm:lookupValue",
+     "kind": "xslt",
+     "summary": "Translate a code between systems using a lookup table (e.g. HCM department code to a payroll vendor code).",
+     "keyFields": [
+      "dvm-location",
+      "src-column",
+      "src-value",
+      "target-column",
+      "default-value"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/managing-lookups.html",
+     "verified": true,
+     "notes": "Signature: lookupValue(dvm-location, src-column, src-value, target-column, default-value). Build it with the Map Lookup Value wizard (lookup must exist first). Domain names max 50 characters; lookup names allow letters, numbers, underscore and dash; values with '#' are not supported. CSV import: first row must be DVM,<table_name> (no spaces); export an existing lookup to CSV to copy the exact layout. Lookups are not redeployed on activation; edits apply to active integrations (sometimes after a few minutes). Test for the default value to catch unmapped codes.",
+     "examples": [
+      {
+       "title": "Oracle example",
+       "lang": "xpath",
+       "code": "dvm:lookupValue('countrycode', 'countrycode', srcValuePlaceHolder, 'name', 'No data found')"
+      },
+      {
+       "title": "Department code translation",
+       "lang": "xpath",
+       "code": "dvm:lookupValue('HCM_DEPT_MAP', 'HCM', /nssrcmpr:execute/ns:DeptCode, 'PAYROLL', 'NOT_FOUND')"
+      }
+     ]
+    },
+    {
+     "id": "oic-base64-functions",
+     "name": "Base64 and file reference functions",
+     "kind": "xslt",
+     "summary": "Convert between text, base64 and stream/file references, e.g. to read a downloaded object as text or to pass text as binary to a function.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/invoke-object-storage-oci-object-storage-action.html",
+     "verified": true,
+     "notes": "Documented in OIC 3 pages (OCI Object Storage and OCI Function actions): encodeBase64, decodeBase64, encodeReferenceToBase64, decodeBase64ToReference. Oracle shows them without a namespace prefix; the mapper inserts the prefix when you drag the function from the palette. The legacy Integration Cloud Service mapper guide also lists generate-guid, parseXML, create-nodeset-from-delimited-string and lookup-xml under Advanced functions; confirm they exist in your OIC 3 palette before use (not verified on an OIC 3 page).",
+     "examples": [
+      {
+       "title": "Stream reference to text",
+       "lang": "xpath",
+       "code": "decodeBase64(encodeReferenceToBase64($DownloadObject/StreamReference))"
+      },
+      {
+       "title": "Text to file reference",
+       "lang": "xpath",
+       "code": "decodeBase64ToReference(encodeBase64($payloadText))"
+      }
+     ]
+    },
+    {
+     "id": "oic-fault-flow-functions",
+     "name": "Fault and flow functions (getFlowId, getFaultAsString)",
+     "kind": "xslt",
+     "summary": "Integration Cloud functions in the Expression Builder for fault details and the flow ID, used in fault handlers and notifications.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/add-global-faults-orchestrated-integrations.html",
+     "verified": true,
+     "notes": "Listed under Functions > Integration Cloud: getFaultAsString, getFaultAsXML, getFaultName, getFaultedActionName, getFlowId, lookupValue; available in the Expression Builder in integrations. Drag them from the palette to get the correct prefix. An ora:getInstanceId function was not found in the OIC 3 pages read; do not assume it exists.",
+     "examples": [
+      {
+       "title": "Fault detail check (Oracle example)",
+       "lang": "xpath",
+       "code": "$TargetApplicationObject1/nssrcmpr:fault/nssrcmpr:details = \"ERROR\""
+      }
+     ]
+    },
+    {
+     "id": "oic-xslt-constructs",
+     "name": "XSLT constructs and data manipulation",
+     "kind": "xslt",
+     "summary": "Use XSLT statements in the mapper (if, for-each, for-each-group, copy-of, variables) and number formatting for padding and rounding.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/mapper-user/perform-data-manipulations-mapper.html",
+     "verified": true,
+     "notes": "Mapper function groups: Advanced, Boolean, Conversion, Data, Integration Cloud, Mathematical, Node-set, String, plus Operators and XSLT Constructors. Use cases documented: for-each-group, copy-of deep copy, counter in for-each, conditional mappings, CDATA output (xsl:output cdata-section-elements; not for stage file/FTP), date conversion via xsl:variable lookup tables. Unsupported functions such as document() fail validation ('Could not find function'). Do not use CDATA inside XSLT string functions.",
+     "examples": [
+      {
+       "title": "Left-pad to 9 digits",
+       "lang": "xpath",
+       "code": "fn:format-number(12345, '000000000')"
+      },
+      {
+       "title": "Round to 2 decimals",
+       "lang": "xpath",
+       "code": "fn:format-number(12345.12345, '#.00')"
+      },
+      {
+       "title": "Group and sum",
+       "lang": "xml",
+       "code": "<xsl:for-each-group select=\"/ns:Root/ns:Line\" group-by=\"ns:Code\">\n  <xsl:value-of select=\"fn:current-grouping-key()\"/>\n  <xsl:value-of select=\"sum(fn:current-group()/ns:Amount)\"/>\n</xsl:for-each-group>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oic-platform",
+   "name": "Projects, recipes and observability",
+   "description": "OIC 3 projects and deployments, prebuilt recipes and accelerators, and runtime tracking.",
+   "items": [
+    {
+     "id": "oic-projects",
+     "name": "Projects",
+     "kind": "concept",
+     "summary": "Single workspace that holds integrations, connections, lookups, libraries and other components of a solution, with role-based access and project-level monitoring.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/integration-projects.html",
+     "verified": true,
+     "notes": "Projects are the only way to control edit/view/monitor access at a fine-grained level (RBAC). Moving an integration into a project changes its endpoint. Converting Gen 2 packages to projects is optional. Lookups can be shared with other projects ('Share with other projects' appears only when creating a lookup in a project). Limits are in Service Limits; see also Restrictions for Projects."
+    },
+    {
+     "id": "oic-project-deployment",
+     "name": "Project deployments and .CAR export",
+     "kind": "concept",
+     "summary": "A deployment is a named snapshot of the integration and robot versions to promote; export it as a .CAR file (or to Git) and import it into the next environment.",
+     "children": [
+      "Deploy tab",
+      ".CAR",
+      "GitHub export"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/export-project.html",
+     "verified": true,
+     "notes": "Create under the project's Deploy tab: name, identifier, select versions (latest by default; robots must be added manually; not two minor versions of one major), Save, Activate with Production or Audit tracing. You cannot export a single integration; export a deployment containing it. The .CAR excludes remote shared connections and local connection override configuration; importing does not replace existing resources, so target overrides survive. Do not click Refresh during export. Oracle advises rolling back at individual integration level rather than reverting a whole deployment in production."
+    },
+    {
+     "id": "oic-recipes-accelerators",
+     "name": "Recipes and accelerators (Integration store)",
+     "kind": "concept",
+     "summary": "Prebuilt integrations: recipes are editable templates; accelerators are run-ready business or technical solutions that can be configured, extended and upgraded.",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/use-recipes/learn-recipes-accelerators.html",
+     "verified": true,
+     "notes": "Install from the Home page: Browse solutions opens the Integration store; click Get on the card, then configure resources (connections, integration flows, lookups) and activate. Recipes cannot auto-upgrade; accelerators can upgrade without losing extensions (extension groups). Package export supports bartatype BA, R, TA and prebuilt=true."
+    },
+    {
+     "id": "oic-observability",
+     "name": "Activity stream, tracking and business identifiers",
+     "kind": "concept",
+     "summary": "Track instances by business values and inspect each instance's activity stream for payloads and errors.",
+     "keyFields": [
+      "primary business identifier",
+      "activity stream",
+      "Observability > Instances"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/business-identifiers-tracking-fields-messages.html",
+     "verified": true,
+     "notes": "Define up to three business identifiers on payload fields; one is the primary. Values appear on the Instances and Errors pages and can be searched via REST q primaryValue/businessIDValue. Schedule parameters can be business identifiers. Activity stream: payloads under 32 KB view inline, larger ones download; binary payloads and attachments are not viewable; Download gives the whole stream. Instance data retention used by the monitoring API is 32 days."
+    }
+   ]
+  }
+ ],
+ "cookbook": [
+  {
+   "id": "oic-hcm-extract-to-sftp",
+   "title": "Scheduled HCM Extract delivered to an SFTP folder",
+   "module": "OIC",
+   "level": "intermediate",
+   "problem": "A payroll or benefits vendor needs the latest HCM Extract file on SFTP every night, and each extract run must be sent only once.",
+   "prerequisites": [
+    "HCM Extract with delivery type WebCenter Content and a unique Integration Name",
+    "Extract output schema exported from HCM (for Stage File)",
+    "HCM Cloud Adapter connection with an integration user that has the required roles",
+    "FTP Adapter connection to the target SFTP server or to OIC File Server (enabled by an administrator)"
+   ],
+   "steps": [
+    "Create a schedule integration and add a schedule parameter lastProcessedDocumentID with default value 0.",
+    "Add the HCM Cloud Adapter as invoke: action 'Receive Files from HCM Cloud'; enter the extract's Integration Name in 'What is the Integration Name for HCM Extracts'; tick 'Unzip the extract' (and 'Decrypt the extract' if PGP is configured on the connection).",
+    "In the request mapper, map the schedule parameter to lastProcessedDocumentID.",
+    "Add a Stage File action, operation Read File in Segments; map filename and directory from GetFileResponse/HcmDataExtractResponse/ICSFile/Properties; upload the exported extract schema and select the repeating batch element.",
+    "Inside the segment scope, invoke the FTP Adapter Write File operation to the vendor folder (CSV output; Append to Existing File is acceptable for CSV but is slow record by record).",
+    "After the Stage File scope, Assign the processed Document ID from the adapter response to lastProcessedDocumentID so the next run skips it.",
+    "Set the file name as primary business identifier, wrap the FTP write in a Scope with a default fault handler that sends a Notification and re-throws, then activate and add the schedule."
+   ],
+   "examples": [
+    {
+     "title": "Run once on demand (reset the parameter)",
+     "lang": "bash",
+     "code": "curl -X POST -H 'Authorization: Bearer '$TOKEN -H 'Content-Type: application/json' \\\n  -d '{\"action\":\"NOW\",\"parameters\":[{\"name\":\"lastProcessedDocumentID\",\"value\":\"0\"}]}' \\\n  'https://<oic-host>/ic/api/integration/v1/integrations/HCM_EXTRACT_SFTP%7C01.00.0000/schedule/jobs?integrationInstance=<service-instance>'"
+    }
+   ],
+   "testing": [
+    "Run the extract in HCM, then run the integration ad hoc; confirm the instance is Succeeded in Observability > Instances.",
+    "Connect with an SFTP client and confirm the file name, row count and encoding.",
+    "Run again without a new extract and confirm no duplicate file is written (parameter was updated)."
+   ],
+   "rollback": [
+    "Stop or pause the schedule (REST schedule/stop or Monitor integrations page) and deactivate the integration.",
+    "Delete the delivered file from the SFTP folder if the vendor has not consumed it.",
+    "To resend, set a new value for lastProcessedDocumentID on the Update schedule parameters page and run ad hoc."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/paas/application-integration/hcm-adapter/sample-integration-flow-demonstrate-extract-bulk-data-option.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/hcm-adapter/invoke-operation-page.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/create-update-parameters-scheduled-integrations.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/ftp-adapter/invoke-operations-page.html"
+   ]
+  },
+  {
+   "id": "oic-erp-fbdi-with-callback",
+   "title": "FBDI import into ERP Cloud with a completion callback",
+   "module": "OIC",
+   "level": "advanced",
+   "problem": "Load a batch (for example journals or AP invoices) through FBDI and run follow-up logic when Fusion finishes the load and import.",
+   "prerequisites": [
+    "ERP Cloud Adapter connection with an integration user holding the roles listed in the adapter prerequisites",
+    "FBDI template for the target object and its job properties file (see Oracle Support 2102800.1)",
+    "Confirmed that the target job is in the File-Based Data Imports list"
+   ],
+   "steps": [
+    "In the main integration, write the CSV data file with Stage File Write File using the FBDI column layout.",
+    "Write or reuse the job properties file, then create the ZIP with Stage File Zip File (CSV + properties). Alternatively select 'Reuse job property file uploaded separately in respective UCM account'.",
+    "Add the ERP Cloud Adapter invoke: Actions page 'Import Bulk Data into Oracle ERP Cloud'; Operations page 'Select Bulk Data Import Process'; Response page tick 'Enable Callback'.",
+    "Map the ZIP file reference into the adapter request and store the returned request ID as a business identifier.",
+    "Create a second (callback) integration with the ERP Cloud Adapter as trigger and select 'Receive Callback Message upon completion of FBDI bulk import job submitted via another integration'; choose the same import process. Activation subscribes to ErpImportBulkDataEvent automatically.",
+    "In the callback, use a Switch on the status in the callback payload (check the field names in the mapper) to notify on errors or start downstream steps."
+   ],
+   "examples": [
+    {
+     "title": "Flow outline",
+     "lang": "text",
+     "code": "Main:  Stage File Write (CSV) -> Stage File Zip -> ERP adapter: Import Bulk Data into Oracle ERP Cloud (Enable Callback)\nCallback: ERP adapter trigger: Receive Callback Message upon completion of FBDI bulk import job\n          -> Switch on status -> Notification / next integration"
+    }
+   ],
+   "testing": [
+    "Submit a small file in a test pod and confirm the load and import processes complete in Fusion Scheduled Processes.",
+    "Confirm a callback instance appears in Observability > Instances for both success and a deliberate failure (the event is raised either way).",
+    "Reconcile record counts in the target ERP table or report."
+   ],
+   "rollback": [
+    "Deactivate the main integration to stop new submissions; deactivate the callback integration (see the business event troubleshooting topic for deactivation behavior).",
+    "Data already imported must be reversed with the ERP functional process for that object (for example reversing journals); FBDI has no automatic undo."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/paas/application-integration/erp-adapter/invoke-file-based-data-import-fbdi-job.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/erp-adapter/configure-callbacks.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/erp-adapter/invoke-operation-page.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/process-files-scheduled-integrations-stage-file-action.html"
+   ]
+  },
+  {
+   "id": "oic-rest-async-fault-resubmit",
+   "title": "REST-triggered record sync with fault handling and resubmit",
+   "module": "OIC",
+   "level": "intermediate",
+   "problem": "An external system posts records to OIC, which pushes them to a target API; transient target failures must be recoverable without the sender re-posting.",
+   "prerequisites": [
+    "Confidential application with client credentials and ServiceInvoker role for the caller",
+    "Target connection (REST Adapter invoke) tested",
+    "Decision that the trigger is asynchronous (no response): synchronous flows cannot be resubmitted"
+   ],
+   "steps": [
+    "Create an app-driven integration with a REST trigger (POST, JSON request, no response) so the flow is asynchronous and recoverable.",
+    "Set the record key (e.g. PersonNumber) as primary business identifier.",
+    "Wrap the target invoke in a Scope; in its Default Handler log with a Logger and use Re-throw Fault (or Throw New Fault with Code/Reason/Details for business validation errors).",
+    "Keep the Global Fault handler's Re-throw Fault so unhandled errors reach the error framework and stay recoverable.",
+    "Activate. For operations, query recoverable errors via REST and bulk resubmit them after the target is fixed (max ten resubmits per instance; do not discard instances you want to resubmit)."
+   ],
+   "examples": [
+    {
+     "title": "Find recoverable errors for the integration",
+     "lang": "bash",
+     "code": "curl -G -X GET -H 'Authorization: Bearer '$TOKEN \\\n  --data-urlencode \"q={code: 'WORKER_SYNC', timewindow: '1d', recoverable: 'true'}\" \\\n  'https://<oic-host>/ic/api/integration/v1/monitoring/errors?integrationInstance=<service-instance>'"
+    },
+    {
+     "title": "Resubmit selected instances",
+     "lang": "bash",
+     "code": "curl -X POST -H 'Authorization: Bearer '$TOKEN -H 'Content-Type: application/json' \\\n  -d '{\"ids\":[\"<instance-id-1>\",\"<instance-id-2>\"]}' \\\n  'https://<oic-host>/ic/api/integration/v1/monitoring/errors/resubmit?integrationInstance=<service-instance>'"
+    }
+   ],
+   "testing": [
+    "Post a valid record and confirm Succeeded with the business identifier visible.",
+    "Point the target connection to an unavailable endpoint (test environment), post again, and confirm the instance is errored and recoverable.",
+    "Restore the endpoint, resubmit, and confirm the instance leaves the error list; track bulk jobs with GET /monitoring/errors/recoveryJobs/{id}."
+   ],
+   "rollback": [
+    "Deactivate the integration (pending unprocessed requests are lost, so pause the sender first).",
+    "Discard errored instances that must not be replayed (POST /monitoring/errors/{id}/discard)."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/resubmit-failed-messages.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/manage-group-actions-scope-action.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/add-global-faults-orchestrated-integrations.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-monitoring-errors-resubmit-post.html"
+   ]
+  },
+  {
+   "id": "oic-lookup-code-translation",
+   "title": "Lookup-driven code translation",
+   "module": "OIC",
+   "level": "starter",
+   "problem": "Codes differ between HCM and a downstream system (departments, countries, pay codes) and the business wants to maintain the mapping without code changes.",
+   "prerequisites": [
+    "List of source and target codes agreed with the business",
+    "Access to Design > Lookups or the lookups REST API"
+   ],
+   "steps": [
+    "Create a lookup with two domain-name columns (e.g. HCM and PAYROLL; max 50 characters each) and the code rows, or import a CSV whose first row is DVM,<table_name>.",
+    "In the mapper, build dvm:lookupValue with the Map Lookup Value wizard: source column HCM, target column PAYROLL, default value NOT_FOUND.",
+    "Add a Switch after the map: when the translated value is NOT_FOUND, Throw New Fault with the source code in Details so unmapped codes are visible on the Errors page.",
+    "Maintain rows later in the lookup; active integrations pick up changes without reactivation (allow a few minutes)."
+   ],
+   "examples": [
+    {
+     "title": "Mapper expression",
+     "lang": "xpath",
+     "code": "dvm:lookupValue('HCM_DEPT_MAP', 'HCM', $DeptCode, 'PAYROLL', 'NOT_FOUND')"
+    },
+    {
+     "title": "Read the lookup for audit",
+     "lang": "bash",
+     "code": "curl -X GET -H 'Authorization: Bearer '$TOKEN \\\n  'https://<oic-host>/ic/api/integration/v1/lookups/HCM_DEPT_MAP?integrationInstance=<service-instance>'"
+    }
+   ],
+   "testing": [
+    "Use the mapper Test feature with a known code and an unknown code.",
+    "Run end to end and confirm the target value and the fault for an unmapped code."
+   ],
+   "rollback": [
+    "Export the lookup to CSV before changes; re-import (replace) the saved CSV or PUT the previous definition via REST."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/managing-lookups.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-lookups-name-get.html"
+   ]
+  },
+  {
+   "id": "oic-bulk-file-stage-foreach",
+   "title": "Bulk file processing with List Files, for-each and Stage File",
+   "module": "OIC",
+   "level": "intermediate",
+   "problem": "A folder receives many CSV files a day; each must be parsed, sent to a target, and archived, and one bad file must not stop the rest.",
+   "prerequisites": [
+    "FTP Adapter connection (or File Server enabled)",
+    "Sample CSV to define the Stage File schema",
+    "Inbound and archive folders"
+   ],
+   "steps": [
+    "Create a schedule integration; FTP Adapter List Files with File Name Pattern *.csv, Max Files and Minimum Age (to skip files still being written).",
+    "Add a for-each over the returned file list (Current Element Name currentFile).",
+    "Inside the loop add a Scope: FTP Download File to a Download Directory, then Stage File Read Entire File (< 10 MB) or Read File in Segments for larger files.",
+    "Map and invoke the target; then FTP Move a File from inbound to the archive folder (Overwrite as required).",
+    "In the scope's Default Handler, log the file name, send a Notification, and move the file to an error folder so the loop continues.",
+    "Optionally enable Process items in parallel on the for-each (schedule integrations only) when files are independent."
+   ],
+   "examples": [
+    {
+     "title": "Flow outline",
+     "lang": "text",
+     "code": "List Files (*.csv) -> for-each currentFile\n  Scope\n    Download File -> Stage File Read (segments) -> target invoke -> Move a File (archive)\n  Default Handler: Logger + Notification + Move a File (error)"
+    }
+   ],
+   "testing": [
+    "Drop two valid files and one malformed file; confirm two archived, one in the error folder, and one notification.",
+    "Check the activity stream for each iteration."
+   ],
+   "rollback": [
+    "Pause the schedule; move files from archive/error back to inbound to reprocess after a fix."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/loop-over-repeating-elements-each-action.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/process-files-scheduled-integrations-stage-file-action.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/ftp-adapter/invoke-operations-page.html"
+   ]
+  },
+  {
+   "id": "oic-monitor-errors-alert",
+   "title": "Monitor failed instances via REST and send an alert",
+   "module": "OIC",
+   "level": "intermediate",
+   "problem": "Support wants an hourly email listing integrations with new errors, without logging in to the console.",
+   "prerequisites": [
+    "Confidential application (client credentials) allowed to call the Developer APIs",
+    "REST Adapter invoke connection to <oic-host> with the OAuth Client Credentials security policy (token URL https://<identity-domain-host>/oauth2/v1/token and the app scope)",
+    "Approved sender address under Settings > Notifications"
+   ],
+   "steps": [
+    "Create a schedule integration that runs hourly.",
+    "Invoke GET /ic/api/integration/v1/monitoring/errors with integrationInstance, q={timewindow:'1h'} and groupBy=integration through the REST Adapter connection.",
+    "Use a Switch: if the response contains any items, build an HTML table in the Notification body (keep it under the 1 MB email limit) and send to the support distribution list.",
+    "Optionally call GET /monitoring/errors with q recoverable:'true' and include instance IDs so the on-call person can resubmit.",
+    "Alternative for operations teams: run the same calls from a scheduled script with curl."
+   ],
+   "examples": [
+    {
+     "title": "Script version",
+     "lang": "bash",
+     "code": "curl -s -G -H 'Authorization: Bearer '$TOKEN -H 'Accept: application/json' \\\n  --data-urlencode \"q={timewindow: '1h'}\" -d 'groupBy=integration' \\\n  'https://<oic-host>/ic/api/integration/v1/monitoring/errors?integrationInstance=<service-instance>'"
+    }
+   ],
+   "testing": [
+    "Force a failure in a test integration and confirm it appears in the next alert.",
+    "Confirm no email (or an 'all clear') when there are no errors."
+   ],
+   "rollback": [
+    "Deactivate or pause the monitoring integration; revoke the confidential application if retired."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-monitoring-errors-get.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/call-developer-apis-client-credentials.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/send-notification-emails-during-stages-integration-notification-action.html"
+   ]
+  },
+  {
+   "id": "oic-promote-environments",
+   "title": "Promote integrations from DEV to TEST/PROD",
+   "module": "OIC",
+   "level": "intermediate",
+   "problem": "Move tested integrations to the next environment in a repeatable, auditable way with a clear rollback.",
+   "prerequisites": [
+    "Same adapters and connection identifiers available in the target",
+    "Developer API access in both instances",
+    "Change record with versions to promote"
+   ],
+   "steps": [
+    "Primary (OIC 3 projects): in the project's Deploy tab create a deployment with the exact integration versions, export it as a .CAR (or to GitHub), import the project in the target, configure connections, then activate the deployment.",
+    "For global (non-project) integrations: export the package with GET /packages/{name}/archive, import with POST /packages/archive (first time) or PUT (replace).",
+    "In the target, configure connection endpoints and credentials, then test each with POST /connections/{id}/test.",
+    "Activate each integration (POST /integrations/{id} with X-HTTP-Method-Override: PATCH and {\"status\":\"ACTIVATED\"}) and start schedules.",
+    "Record the exported archive and versions with the change ticket."
+   ],
+   "examples": [
+    {
+     "title": "Export from DEV and import to TEST",
+     "lang": "bash",
+     "code": "curl -X GET -H 'Authorization: Bearer '$DEV_TOKEN -o hcm.pkg.par \\\n  'https://<dev-oic-host>/ic/api/integration/v1/packages/hcm.pkg/archive?integrationInstance=<dev-instance>'\ncurl -X PUT -H 'Authorization: Bearer '$TEST_TOKEN -F file=@hcm.pkg.par -F type=application/octet-stream \\\n  'https://<test-oic-host>/ic/api/integration/v1/packages/archive?integrationInstance=<test-instance>'"
+    }
+   ],
+   "testing": [
+    "Connection tests return 200.",
+    "Activation status shows ACTIVATED; run a smoke test and check Observability > Instances."
+   ],
+   "rollback": [
+    "Re-import the previous archive (PUT replace) or activate the previous version (activating one version deactivates the other version of the same code).",
+    "For projects, roll back the individual affected integration rather than the whole deployment."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-packages-archive-post.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/export-project.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/integrations-user/create-manage-project-deployment.html",
+    "https://docs.oracle.com/en/cloud/paas/application-integration/rest-api/op-ic-api-integration-v1-integrations-id-post.html"
+   ]
+  }
+ ]
+}

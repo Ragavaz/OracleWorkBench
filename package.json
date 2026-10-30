@@ -1,0 +1,12 @@
+{
+  "name": "vantage-workbench-local",
+  "version": "3.0.0",
+  "description": "Vantage Workbench Local: Oracle Fusion HCM/ERP, OIC and Worklist runner with approvals, for Cloud Vantage consultants",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/e2e.test.js"
+  }
+}

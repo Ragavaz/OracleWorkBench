@@ -1,0 +1,1495 @@
+{
+ "area": "ERP",
+ "title": "Oracle Fusion Cloud ERP (Financials, Procurement, SCM, Projects)",
+ "generated": "2026-10-29",
+ "sources": [
+  {
+   "title": "REST API for Oracle Fusion Cloud Financials - Invoices",
+   "url": "https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/api-invoices.html"
+  },
+  {
+   "title": "REST API for Financials - erpintegrations create (POST) operations",
+   "url": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-post.html"
+  },
+  {
+   "title": "REST API for Financials - erpintegrations GET finders",
+   "url": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-operationname-get.html"
+  },
+  {
+   "title": "SOAP Web Services for Financials - ERP Integration Service",
+   "url": "https://docs.oracle.com/en/cloud/saas/financials/26b/oeswf/erpintegrationservice-d16539e420.html"
+  },
+  {
+   "title": "OIC SOAP adapter - Call Fusion BI Publisher report services",
+   "url": "https://docs.oracle.com/en/cloud/paas/integration-cloud/soap-adapter/call-oracle-fusion-applications-business-intelligence-publisher-report-services.html"
+  },
+  {
+   "title": "BI Publisher Web Services data types (ReportRequest/ReportResponse)",
+   "url": "https://docs.oracle.com/cd/E23943_01/bi.1111/e22259/datatypes.htm"
+  },
+  {
+   "title": "FBDI for Financials - Payables Standard Invoice Import",
+   "url": "https://docs.oracle.com/en/cloud/saas/financials/25d/oefbf/payablesstandardinvoiceimport-3179.html"
+  },
+  {
+   "title": "FBDI for Financials - Journal Import",
+   "url": "https://docs.oracle.com/en/cloud/saas/financials/25d/oefbf/journalimport-3100.html"
+  },
+  {
+   "title": "FBDI for Financials - AutoInvoice Import",
+   "url": "https://docs.oracle.com/en/cloud/saas/financials/26b/oefbf/autoinvoiceimport-3114.html"
+  },
+  {
+   "title": "FBDI for Procurement - Import Suppliers",
+   "url": "https://docs.oracle.com/en/cloud/saas/procurement/25c/oefbp/importsuppliers-3190.html"
+  },
+  {
+   "title": "REST API for Oracle Fusion Cloud Procurement - Suppliers",
+   "url": "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/api-suppliers.html"
+  },
+  {
+   "title": "REST API for Procurement - Purchase Requisitions create",
+   "url": "https://docs.oracle.com/en/cloud/saas/procurement/26b/fapra/op-purchaserequisitions-post.html"
+  },
+  {
+   "title": "REST API for Financials - Create a payment (Payables Payments)",
+   "url": "https://docs.oracle.com/en/cloud/saas/financials/26c/farfa/op-payablespayments-post.html"
+  },
+  {
+   "title": "REST API for Procurement - Purchase Orders",
+   "url": "https://docs.oracle.com/en/cloud/saas/procurement/25c/fapra/api-purchase-orders.html"
+  },
+  {
+   "title": "REST API for Procurement - Draft Purchase Orders",
+   "url": "https://docs.oracle.com/en/cloud/saas/procurement/25d/fapra/api-draft-purchase-orders.html"
+  },
+  {
+   "title": "REST API for SCM - Create sales orders (Order Hub)",
+   "url": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-salesordersfororderhub-post.html"
+  },
+  {
+   "title": "REST API for SCM - Items Version 2",
+   "url": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/25c/fasrp/api-product-lifecycle-management-items-version-2.html"
+  },
+  {
+   "title": "REST API for Project Management - Create a project",
+   "url": "https://docs.oracle.com/en/cloud/saas/project-management/26b/fapap/op-projects-post.html"
+  },
+  {
+   "title": "Tables and Views for Financials - AP_INVOICES_ALL",
+   "url": "https://docs.oracle.com/en/cloud/saas/financials/25d/oedmf/apinvoicesall-26582.html"
+  }
+ ],
+ "categories": [
+  {
+   "id": "erp-payables-rest",
+   "name": "Payables REST",
+   "description": "Payables invoices and their child resources and actions in the Financials REST API (fscmRestApi).",
+   "items": [
+    {
+     "id": "erp-ap-invoices",
+     "name": "Invoices (Payables)",
+     "kind": "rest",
+     "summary": "Create, query, update and delete Payables invoices, with lines, distributions and installments as child resources.",
+     "method": "GET, POST, PATCH, DELETE",
+     "path": "/fscmRestApi/resources/11.13.18.05/invoices",
+     "children": [
+      "invoiceLines",
+      "invoiceInstallments",
+      "invoiceDff",
+      "invoiceGdf",
+      "appliedPrepayments",
+      "availablePrepayments",
+      "attachments"
+     ],
+     "keyFields": [
+      "InvoiceNumber",
+      "BusinessUnit",
+      "Supplier",
+      "SupplierSite",
+      "InvoiceAmount",
+      "InvoiceCurrency",
+      "InvoiceDate",
+      "InvoiceType",
+      "InvoiceGroup",
+      "InvoiceSource",
+      "PaymentTerms"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/api-invoices.html",
+     "verified": true,
+     "notes": "invoicesUniqID is a hash key: never build it, read it from a GET on the collection. 25D create schema lists AccountingDate, BusinessUnit, InvoiceAmount, InvoiceCurrency, InvoiceDate, InvoiceNumber, PaymentCurrency, PaymentMethodCode and TermsDate as required; Supplier and SupplierSite must also be supplied on create. InvoiceType is derived from the amount sign if omitted (Standard / Credit Memo). PATCH does not cascade defaults: changing the invoice date does not recalculate terms date or due date. Optional Upsert-Mode header (true/false).",
+     "examples": [
+      {
+       "title": "Create an invoice with one item line",
+       "lang": "http",
+       "code": "POST /fscmRestApi/resources/11.13.18.05/invoices\nContent-Type: application/json\n\n{\n  \"InvoiceNumber\": \"INV-1001\",\n  \"BusinessUnit\": \"<BU name>\",\n  \"Supplier\": \"<Supplier name>\",\n  \"SupplierSite\": \"<Supplier site>\",\n  \"InvoiceAmount\": 1500.0,\n  \"InvoiceCurrency\": \"USD\",\n  \"PaymentCurrency\": \"USD\",\n  \"PaymentMethodCode\": \"CHECK\",\n  \"InvoiceDate\": \"2026-10-01\",\n  \"AccountingDate\": \"2026-10-01\",\n  \"TermsDate\": \"2026-10-01\",\n  \"Description\": \"Consulting services\",\n  \"invoiceLines\": [\n    {\n      \"LineNumber\": 1,\n      \"LineType\": \"Item\",\n      \"LineAmount\": 1500.0,\n      \"AccountingDate\": \"2026-10-01\",\n      \"DistributionCombination\": \"<seg1-seg2-seg3>\",\n      \"Description\": \"Consulting services\"\n    }\n  ]\n}"
+      },
+      {
+       "title": "Find an invoice to get its invoicesUniqID",
+       "lang": "http",
+       "code": "GET /fscmRestApi/resources/11.13.18.05/invoices?q=InvoiceNumber='INV-1001'&onlyData=true\nAuthorization: Bearer $TOKEN"
+      }
+     ]
+    },
+    {
+     "id": "erp-ap-invoice-lines",
+     "name": "Invoice Lines (child of Invoices)",
+     "kind": "rest",
+     "summary": "Add or read invoice lines, including PO/receipt matching fields; each line can carry its own distributions.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/invoices/{invoicesUniqID}/child/invoiceLines",
+     "children": [
+      "invoiceDistributions",
+      "invoiceLineDff",
+      "invoiceLineGdf",
+      "invoiceLineProjectDff"
+     ],
+     "keyFields": [
+      "LineNumber",
+      "LineType",
+      "LineAmount",
+      "AccountingDate",
+      "DistributionCombination",
+      "DistributionSet",
+      "PurchaseOrderNumber",
+      "PurchaseOrderLineNumber",
+      "PurchaseOrderScheduleLineNumber",
+      "ReceiptNumber",
+      "ReceiptLineNumber",
+      "Quantity",
+      "UnitPrice"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-invoices-invoicesuniqid-child-invoicelines-post.html",
+     "verified": true,
+     "notes": "Required on create: AccountingDate and LineNumber (LineNumber cannot be updated). LineType values: Item, Freight, Miscellaneous. Child invoiceDistributions requires AccountingDate, DistributionAmount, DistributionLineNumber and TrackAsAssetFlag. invoiceLineGdf / invoiceLineProjectDff are polymorphic by __FLEX_Context.",
+     "examples": [
+      {
+       "title": "Add a PO-matched line",
+       "lang": "http",
+       "code": "POST /fscmRestApi/resources/11.13.18.05/invoices/{invoicesUniqID}/child/invoiceLines\nContent-Type: application/json\n\n{\n  \"LineNumber\": 2,\n  \"LineType\": \"Item\",\n  \"AccountingDate\": \"2026-10-01\",\n  \"Quantity\": 10,\n  \"UnitPrice\": 25,\n  \"PurchaseOrderNumber\": \"<PO number>\",\n  \"PurchaseOrderLineNumber\": 1,\n  \"PurchaseOrderScheduleLineNumber\": 1\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-ap-invoice-actions",
+     "name": "Invoice actions (validate, cancel, tax, distributions, prepayments)",
+     "kind": "rest",
+     "summary": "Collection-level actions on Invoices: validateInvoice, cancelInvoice, cancelLine, calculateTax, generateDistributions, reverseDistributions, applyPrepayments, unapplyPrepayments.",
+     "method": "POST",
+     "path": "/fscmRestApi/resources/11.13.18.05/invoices/action/validateInvoice",
+     "children": [
+      "validateInvoice",
+      "cancelInvoice",
+      "cancelLine",
+      "calculateTax",
+      "generateDistributions",
+      "reverseDistributions",
+      "applyPrepayments",
+      "unapplyPrepayments"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/api-invoices.html",
+     "verified": true,
+     "notes": "All are POST on /invoices/action/<name>. The request body of each action was not read in this session: open the operation page (e.g. 'Validate an invoice') for its parameters before coding. Invoice distributions have no separate top-level endpoint; they are created via lines or generateDistributions.",
+     "examples": [
+      {
+       "title": "Action call shape",
+       "lang": "http",
+       "code": "POST /fscmRestApi/resources/11.13.18.05/invoices/action/validateInvoice\nContent-Type: application/vnd.oracle.adf.action+json\n\n{ }"
+      }
+     ]
+    },
+    {
+     "id": "erp-ap-invoice-installments",
+     "name": "Invoice Installments (child of Invoices)",
+     "kind": "rest",
+     "summary": "Read or adjust the payment schedule (installments) of a Payables invoice.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/invoices/{invoicesUniqID}/child/invoiceInstallments",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/api-invoices.html",
+     "verified": true,
+     "notes": "Confirmed as a child collection (invoiceInstallments) and REST subcategory of Invoices. Attribute names were not read in this session; check the 'Invoice Installments REST Endpoints' page before PATCHing due dates or holds.",
+     "examples": []
+    },
+    {
+     "id": "erp-ap-invoice-attachments",
+     "name": "Invoice Attachments (child of Invoices)",
+     "kind": "rest",
+     "summary": "Attach supporting documents (scanned invoice PDF, approvals) to a Payables invoice.",
+     "method": "GET, POST, DELETE",
+     "path": "/fscmRestApi/resources/11.13.18.05/invoices/{invoicesUniqID}/child/attachments",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/api-invoices.html",
+     "verified": true,
+     "notes": "Confirmed as child collection 'attachments'. Field names not read for invoices; the Suppliers attachments child documents FileName, DatatypeCode (default FILE), Description, UploadedFileName, UploadedText and FileContents (base64) - expect the same shape but confirm on the invoice attachments page.",
+     "examples": []
+    },
+    {
+     "id": "erp-ap-payments",
+     "name": "Payables Payments",
+     "kind": "rest",
+     "summary": "Create manual payments and query payments with the invoices they paid.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/payablesPayments",
+     "children": [
+      "relatedInvoices",
+      "paymentDff",
+      "paymentGdf"
+     ],
+     "keyFields": [
+      "CheckId",
+      "PaymentNumber",
+      "PaymentDate",
+      "BusinessUnit",
+      "PaymentCurrency",
+      "PaymentMethodCode",
+      "Payee",
+      "PayeeSite",
+      "DisbursementBankAccountName",
+      "PaymentDocument",
+      "PaymentProcessProfile"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26c/farfa/op-payablespayments-post.html",
+     "verified": true,
+     "notes": "Required on create: BusinessUnit, PaymentCurrency, PaymentDate, PaymentMethodCode, PaymentNumber (check number). Only manual payments can be created. Use Payee/PayeeSite (no Supplier attribute), DisbursementBankAccountName, PaymentDocument, PaymentProcessProfile. ExternalBankAccountId wins over RemitToAccountNumber. Item key is CheckId (/payablesPayments/{CheckId}). Children: relatedInvoices, paymentDff, paymentGdf.",
+     "examples": [
+      {
+       "title": "Create a manual payment (placeholders)",
+       "lang": "json",
+       "code": "{\n  \"BusinessUnit\": \"<BU name>\",\n  \"PaymentNumber\": 100001,\n  \"PaymentDate\": \"2026-10-29\",\n  \"PaymentCurrency\": \"USD\",\n  \"PaymentMethodCode\": \"CHECK\",\n  \"Payee\": \"<Supplier party name>\",\n  \"PayeeSite\": \"<Supplier site>\",\n  \"DisbursementBankAccountName\": \"<Internal bank account>\",\n  \"PaymentDocument\": \"<Payment document>\",\n  \"PaymentProcessProfile\": \"<PPP name>\"\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-ap-invoice-holds",
+     "name": "Invoice Holds",
+     "kind": "rest",
+     "summary": "Place or release holds on Payables invoices from an external approval or matching system.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/invoiceHolds",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/op-invoiceholds-post.html",
+     "verified": false,
+     "notes": "UNVERIFIED: only the operation title 'Create an invoice hold' and its URL slug were seen in search results. Open the page to confirm the resource name casing (likely invoiceHolds), required fields and the release attributes.",
+     "examples": []
+    },
+    {
+     "id": "erp-ap-interface-submit-import",
+     "name": "Payables Interface Invoices - submit import",
+     "kind": "rest",
+     "summary": "Action that runs Import Payables Invoices for rows already in the Payables interface.",
+     "method": "POST",
+     "path": "/fscmRestApi/resources/11.13.18.05/payablesInterfaceInvoices/action/submitImportInvoices",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-payablesinterfaceinvoices-action-submitimportinvoices-post.html",
+     "verified": false,
+     "notes": "UNVERIFIED: operation title 'Import payables invoices' seen in search only. Confirm resource name casing (payablesInterfaceInvoices), the action name submitImportInvoices and its parameters before use. For file loads prefer erpintegrations importBulkData.",
+     "examples": []
+    }
+   ]
+  },
+  {
+   "id": "erp-receivables-rest",
+   "name": "Receivables & Cash REST",
+   "description": "Customer invoices and receipts in Receivables.",
+   "items": [
+    {
+     "id": "erp-ar-invoices",
+     "name": "Receivables Invoices",
+     "kind": "rest",
+     "summary": "Create, query, update and delete Receivables (customer) invoices, plus approval and installment actions.",
+     "method": "GET, POST, PATCH, DELETE",
+     "path": "/fscmRestApi/resources/11.13.18.05/receivablesInvoices",
+     "children": [
+      "Receivables Invoice Lines",
+      "Receivables Invoice Distributions",
+      "Receivables Invoice Installments",
+      "Receivables Invoice Notes",
+      "Receivables Invoice Attachments",
+      "Descriptive / Global / Transaction DFFs"
+     ],
+     "keyFields": [
+      "CustomerTransactionId",
+      "InvoiceStatus",
+      "PaymentTerms",
+      "TransactionDate"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26d/farfa/api-receivables-invoices.html",
+     "verified": true,
+     "notes": "Path parameter is CustomerTransactionId. Only InvoiceStatus, PaymentTerms and TransactionDate can be updated with PATCH. Actions: splitInstallments, approve, rework, resendInvoiceCopy (POST on /{CustomerTransactionId}/action/<name>).",
+     "examples": [
+      {
+       "title": "Get one receivables invoice",
+       "lang": "http",
+       "code": "GET /fscmRestApi/resources/11.13.18.05/receivablesInvoices/300000012345678\nAuthorization: Bearer $TOKEN"
+      },
+      {
+       "title": "Approve a pending-approval invoice",
+       "lang": "http",
+       "code": "POST /fscmRestApi/resources/11.13.18.05/receivablesInvoices/300000012345678/action/approve\nContent-Type: application/vnd.oracle.adf.action+json\n\n{ }"
+      }
+     ]
+    },
+    {
+     "id": "erp-ar-standard-receipts",
+     "name": "Standard Receipts",
+     "kind": "rest",
+     "summary": "Record customer payments as standard receipts; optionally pass remittance references so AutoMatch applies them later.",
+     "method": "GET, POST, PATCH, DELETE",
+     "path": "/fscmRestApi/resources/11.13.18.05/standardReceipts",
+     "children": [
+      "Remittance References",
+      "Attachments",
+      "Standard Receipt Descriptive Flexfields",
+      "Standard Receipt Global Descriptive Flexfields"
+     ],
+     "keyFields": [
+      "StandardReceiptId"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/25d/farfa/api-standard-receipts.html",
+     "verified": true,
+     "notes": "Path parameter StandardReceiptId. Remittance references let 'Apply Receipts Using AutoMatch' apply the receipt asynchronously. Attribute names for create were not read in this session; check 'Create a standard receipt' for required fields (receipt method, business unit, amount, receipt date, customer).",
+     "examples": [
+      {
+       "title": "Get one receipt",
+       "lang": "http",
+       "code": "GET /fscmRestApi/resources/11.13.18.05/standardReceipts/300000012345678\nAuthorization: Bearer $TOKEN"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "erp-gl-rest",
+   "name": "General Ledger REST",
+   "description": "Journals and currency rates. Journal creation itself goes through FBDI.",
+   "items": [
+    {
+     "id": "erp-gl-journal-batches",
+     "name": "Journal Batches",
+     "kind": "rest",
+     "summary": "View journal batches with headers and lines, update completion status / reversal attributes, or delete a batch.",
+     "method": "GET, PATCH, DELETE",
+     "path": "/fscmRestApi/resources/11.13.18.05/journalBatches",
+     "children": [
+      "journalHeaders",
+      "journalHeaders/journalLines",
+      "Errors",
+      "Action Logs",
+      "Attachments",
+      "Descriptive Flexfields"
+     ],
+     "keyFields": [
+      "JeBatchId"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26c/farfa/api-journal-batches.html",
+     "verified": true,
+     "notes": "No POST: journals are not created through this resource - use Journal Import (FBDI) for creation. PATCH can only change batch completion status and reversal attributes. Path parameter JeBatchId. Children: Journal Headers (with lines), Errors, Action Logs, Attachments, Descriptive Flexfields.",
+     "examples": [
+      {
+       "title": "Get a batch",
+       "lang": "http",
+       "code": "GET /fscmRestApi/resources/11.13.18.05/journalBatches/300000012345678\nAuthorization: Bearer $TOKEN"
+      }
+     ]
+    },
+    {
+     "id": "erp-gl-currency-rates",
+     "name": "Currency Rates",
+     "kind": "rest",
+     "summary": "Read daily conversion rates (read-only collection).",
+     "method": "GET",
+     "path": "/fscmRestApi/resources/11.13.18.05/currencyRates",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/rest-endpoints.html",
+     "verified": true,
+     "notes": "Only 'Get all currency rates' is supported; GET on a single row (currencyRatesUniqID) is listed as not supported. To load rates use the Daily Rates import (FBDI / web service) instead.",
+     "examples": [
+      {
+       "title": "List rates",
+       "lang": "http",
+       "code": "GET /fscmRestApi/resources/11.13.18.05/currencyRates?limit=25\nAuthorization: Bearer $TOKEN"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "erp-procurement-rest",
+   "name": "Procurement & Suppliers REST",
+   "description": "Supplier model and requisition resources from the Procurement REST API (fapra book).",
+   "items": [
+    {
+     "id": "erp-prc-suppliers",
+     "name": "Suppliers",
+     "kind": "rest",
+     "summary": "Create, query and update suppliers; addresses, sites, contacts and classifications are child resources.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/suppliers",
+     "children": [
+      "addresses",
+      "sites",
+      "contacts",
+      "businessClassifications",
+      "productsAndServices",
+      "attachments",
+      "DFF",
+      "globalDFF"
+     ],
+     "keyFields": [
+      "SupplierId",
+      "Supplier",
+      "SupplierNumber",
+      "SupplierTypeCode",
+      "TaxOrganizationTypeCode",
+      "BusinessRelationshipCode",
+      "TaxpayerId",
+      "DUNSNumber",
+      "InactiveDate"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/api-suppliers.html",
+     "verified": true,
+     "notes": "Endpoints: POST/GET collection, GET/PATCH /suppliers/{SupplierId}. There is no DELETE - inactivate with InactiveDate. Lookup-backed codes: SupplierTypeCode (POZ_VENDOR_TYPE), TaxOrganizationTypeCode (POZ_ORGANIZATION_TYPE), BusinessRelationshipCode (ORA_POZ_BUSINESS_RELATIONSHIP). CreationSourceCode defaults to WEB_SERVICE. Actions include submitSpendAuthorizationRequest and submitSpendAuthorizationRequestWithSites. The 26C schema extract also lists SupplierNumber/SupplierPartyId as required; in practice test a minimal create in a test pod (numbering may be automatic).",
+     "examples": [
+      {
+       "title": "Create a supplier (minimal)",
+       "lang": "http",
+       "code": "POST /fscmRestApi/resources/11.13.18.05/suppliers\nContent-Type: application/json\n\n{\n  \"Supplier\": \"Example Supplies Ltd\",\n  \"TaxOrganizationTypeCode\": \"<POZ_ORGANIZATION_TYPE code>\",\n  \"BusinessRelationshipCode\": \"<ORA_POZ_BUSINESS_RELATIONSHIP code>\",\n  \"SupplierTypeCode\": \"<POZ_VENDOR_TYPE code>\"\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-prc-supplier-addresses",
+     "name": "Supplier Addresses (child of Suppliers)",
+     "kind": "rest",
+     "summary": "Create the supplier address that sites are later attached to, with ordering / remit-to / RFQ purposes.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/suppliers/{SupplierId}/child/addresses",
+     "keyFields": [
+      "SupplierAddressId",
+      "AddressName",
+      "Country",
+      "CountryCode",
+      "AddressLine1",
+      "City",
+      "State",
+      "PostalCode",
+      "AddressPurposeOrderingFlag",
+      "AddressPurposeRemitToFlag",
+      "AddressPurposeRFQOrBiddingFlag"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/op-suppliers-supplierid-child-addresses-post.html",
+     "verified": true,
+     "notes": "Schema marks CountryCode and Email as required, but Oracle's own example sends Country (name) without CountryCode or Email - test both. Response returns SupplierAddressId (needed for the site).",
+     "examples": [
+      {
+       "title": "Oracle documented example body",
+       "lang": "json",
+       "code": "{\n  \"AddressName\": \"Headquarter\",\n  \"Country\": \"United States\",\n  \"AddressLine1\": \"Example Road\",\n  \"City\": \"Redwood City\",\n  \"State\": \"CA\",\n  \"PostalCode\": \"94065\",\n  \"AddressPurposeOrderingFlag\": true,\n  \"AddressPurposeRemitToFlag\": true,\n  \"AddressPurposeRFQOrBiddingFlag\": false\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-prc-supplier-sites",
+     "name": "Supplier Sites (child of Suppliers)",
+     "kind": "rest",
+     "summary": "Create a supplier site in a procurement BU on an existing supplier address, with purchasing/pay purposes and payables defaults.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/suppliers/{SupplierId}/child/sites",
+     "children": [
+      "assignments",
+      "attachments",
+      "DFF",
+      "globalDFF",
+      "thirdPartyPaymentRelationships"
+     ],
+     "keyFields": [
+      "SupplierSiteId",
+      "SupplierSite",
+      "ProcurementBUId",
+      "ProcurementBU",
+      "SupplierAddressId",
+      "SitePurposePurchasingFlag",
+      "SitePurposePayFlag",
+      "PaymentTerms",
+      "PayGroup",
+      "CommunicationMethodCode"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/op-suppliers-supplierid-child-sites-post.html",
+     "verified": true,
+     "notes": "Required: ProcurementBUId and SupplierSite. Link to the address with SupplierAddressId (or SupplierAddressName). Purpose flags default to false - set SitePurposePurchasingFlag / SitePurposePayFlag explicitly. Children: assignments (client BU site assignments), attachments, DFF, globalDFF, thirdPartyPaymentRelationships.",
+     "examples": [
+      {
+       "title": "Create a purchasing + pay site",
+       "lang": "json",
+       "code": "{\n  \"SupplierSite\": \"EXAMPLE-HQ\",\n  \"ProcurementBUId\": 300000012345678,\n  \"SupplierAddressId\": 300000012345679,\n  \"SitePurposePurchasingFlag\": true,\n  \"SitePurposePayFlag\": true\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-prc-supplier-contacts",
+     "name": "Supplier Contacts (child of Suppliers)",
+     "kind": "rest",
+     "summary": "Maintain supplier contact persons; each contact can have addresses, roles and data access children.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/suppliers/{SupplierId}/child/contacts",
+     "children": [
+      "addresses",
+      "dataaccess",
+      "roles",
+      "DFF"
+     ],
+     "keyFields": [
+      "FirstName",
+      "LastName",
+      "Email"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/procurement/26c/fapra/op-suppliers-post.html",
+     "verified": true,
+     "notes": "Confirmed as child collection 'contacts' (subcategory Contacts) with children addresses, dataaccess, roles, DFF. Path follows the same /child/ pattern as addresses and sites. The schema extract flags Email and InactiveDate as required - confirm on the 'Create one contact' page before use.",
+     "examples": []
+    },
+    {
+     "id": "erp-prc-requisitions",
+     "name": "Purchase Requisitions",
+     "kind": "rest",
+     "summary": "Create requisition headers with lines (and distributions) from an external catalog, portal or chatbot, then submit for approval.",
+     "method": "GET, POST, PATCH, DELETE",
+     "path": "/fscmRestApi/resources/11.13.18.05/purchaseRequisitions",
+     "children": [
+      "lines",
+      "lines/distributions",
+      "DFF",
+      "attachments",
+      "specialHandlingDFF",
+      "summaryAttributes"
+     ],
+     "keyFields": [
+      "RequisitionHeaderId",
+      "PreparerId",
+      "PreparerEmail",
+      "RequisitioningBUId",
+      "RequisitioningBU",
+      "Description",
+      "Justification",
+      "ExternallyManagedFlag"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/procurement/26b/fapra/op-purchaserequisitions-post.html",
+     "verified": true,
+     "notes": "Required header fields: PreparerId and RequisitioningBUId (RequisitioningBU name is also accepted per schema). Line requires LineNumber. Useful line fields: ItemDescription, Item, CategoryName, Quantity, UOM/UOMCode, Price, CurrencyCode, DestinationTypeCode, DeliverToLocationCode, RequesterEmail, RequestedDeliveryDate, LineTypeCode. Distribution item schema was not read - confirm ChargeAccount-style fields on the Distributions page.",
+     "examples": [
+      {
+       "title": "Create a requisition with one non-catalog line",
+       "lang": "http",
+       "code": "POST /fscmRestApi/resources/11.13.18.05/purchaseRequisitions\nContent-Type: application/json\n\n{\n  \"RequisitioningBU\": \"<BU name>\",\n  \"PreparerEmail\": \"preparer@example.com\",\n  \"Description\": \"Laptops for new joiners\",\n  \"Justification\": \"Onboarding\",\n  \"lines\": [\n    {\n      \"LineNumber\": 1,\n      \"ItemDescription\": \"Laptop 14 inch\",\n      \"CategoryName\": \"<category>\",\n      \"Quantity\": 2,\n      \"UOM\": \"Each\",\n      \"Price\": 900,\n      \"CurrencyCode\": \"USD\",\n      \"DestinationTypeCode\": \"EXPENSE\",\n      \"DeliverToLocationCode\": \"<location code>\",\n      \"RequesterEmail\": \"requester@example.com\",\n      \"RequestedDeliveryDate\": \"2026-11-15\"\n    }\n  ]\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-prc-requisition-submit",
+     "name": "Purchase Requisitions - submitRequisition action",
+     "kind": "rest",
+     "summary": "Submit a created requisition into approvals.",
+     "method": "POST",
+     "path": "/fscmRestApi/resources/11.13.18.05/purchaseRequisitions/{purchaseRequisitionsUniqID}/action/submitRequisition",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/op-purchaserequisitions-purchaserequisitionsuniqid-action-submitrequisition-post.html",
+     "verified": true,
+     "notes": "Content-Type application/vnd.oracle.adf.action+json. Optional body: approverCheckoutFlowFlag, requestFundsOverrideFlag (both default false), options (map of strings). Response { result: SUCCESS | FAILURE }. Approval is bypassed if the requisition is externally managed or already carries approver details. purchaseRequisitionsUniqID is a hash key - read it from the collection, do not build it.",
+     "examples": [
+      {
+       "title": "Submit",
+       "lang": "http",
+       "code": "POST /fscmRestApi/resources/11.13.18.05/purchaseRequisitions/{purchaseRequisitionsUniqID}/action/submitRequisition\nContent-Type: application/vnd.oracle.adf.action+json\n\n{\n  \"requestFundsOverrideFlag\": false\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-prc-purchase-orders",
+     "name": "Purchase Orders",
+     "kind": "rest",
+     "summary": "Query approved purchase orders and run lifecycle actions (cancel, close, hold, communicate, acknowledge, reopen, PDF).",
+     "method": "GET, POST (actions)",
+     "path": "/fscmRestApi/resources/11.13.18.05/purchaseOrders",
+     "children": [
+      "Lines",
+      "Attachments for Purchase Orders",
+      "Flexfields for Purchase Orders",
+      "Special Handling Flexfields",
+      "US Federal Attributes"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/procurement/25c/fapra/api-purchase-orders.html",
+     "verified": true,
+     "notes": "No POST on the collection: create orders through Draft Purchase Orders (or from requisitions). Actions (POST /{purchaseOrdersUniqID}/action/<name>): acknowledge, cancel, close, communicate (re-communicate), communicateOnePurchaseOrder, viewPDF, viewMasterContract, duplicate, freeze, unfreeze, hold, removeHold, renumberPO, reopen, submit, generateHighlights.",
+     "examples": [
+      {
+       "title": "Find a PO",
+       "lang": "http",
+       "code": "GET /fscmRestApi/resources/11.13.18.05/purchaseOrders?q=OrderNumber='<PO number>'&onlyData=true\nAuthorization: Bearer $TOKEN"
+      }
+     ]
+    },
+    {
+     "id": "erp-prc-draft-purchase-orders",
+     "name": "Draft Purchase Orders",
+     "kind": "rest",
+     "summary": "Create and edit purchase orders (and change orders) before they are communicated, then validate and submit.",
+     "method": "GET, POST, PATCH, DELETE",
+     "path": "/fscmRestApi/resources/11.13.18.05/draftPurchaseOrders",
+     "children": [
+      "Lines",
+      "Attachments",
+      "Summary Attributes",
+      "Template Applied to Business Documents",
+      "US Federal Attributes"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/procurement/25d/fapra/api-draft-purchase-orders.html",
+     "verified": true,
+     "notes": "Collection supports GET and POST ('Create one header'); item GET/PATCH/DELETE on {draftPurchaseOrdersUniqID}. Actions include validateDocument, submit, withdraw, checkFunds, calculateTaxAndAccounting, cancelChangeOrder, deleteChangeOrder, updateAllLines, viewPDF, eSign. Header/line attribute names were not read - check 'Create one header'.",
+     "examples": [
+      {
+       "title": "Submit a draft",
+       "lang": "http",
+       "code": "POST /fscmRestApi/resources/11.13.18.05/draftPurchaseOrders/{draftPurchaseOrdersUniqID}/action/submit\nContent-Type: application/vnd.oracle.adf.action+json\n\n{ }"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "erp-scm-projects-rest",
+   "name": "SCM & Projects REST",
+   "description": "Key Supply Chain (Order Hub sales orders, items, receipts) and Project Management resources that share the fscmRestApi base path.",
+   "items": [
+    {
+     "id": "erp-scm-sales-orders-hub",
+     "name": "Sales Orders for Order Hub",
+     "kind": "rest",
+     "summary": "Create, revise and query sales orders from an external order capture system in Order Management.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/salesOrdersForOrderHub",
+     "children": [
+      "lines",
+      "billToCustomer",
+      "shipToCustomer",
+      "payments",
+      "holds",
+      "salesCredits",
+      "additionalInformation",
+      "attachments",
+      "totals",
+      "promotionCodes"
+     ],
+     "keyFields": [
+      "OrderKey",
+      "SourceTransactionSystem",
+      "SourceTransactionNumber",
+      "SourceTransactionId",
+      "SourceTransactionRevisionNumber",
+      "BusinessUnitId",
+      "BuyingPartyNumber",
+      "TransactionalCurrencyCode",
+      "TransactionOn",
+      "SubmittedFlag"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-salesordersfororderhub-post.html",
+     "verified": true,
+     "notes": "Required: BusinessUnitId, SourceTransactionId, SourceTransactionNumber, SourceTransactionRevisionNumber, SourceTransactionSystem. Item key is OrderKey (e.g. <SourceSystem>:<SourceOrderNumber> or the header id). SubmittedFlag true submits, false keeps a draft (doc text and schema default disagree - always send it). FreezePriceFlag / FreezeTaxFlag / FreezeShippingChargeFlag default true. Line attribute names were truncated on the page read - check the lines schema before coding.",
+     "examples": [
+      {
+       "title": "Header skeleton (add lines per the lines schema)",
+       "lang": "json",
+       "code": "{\n  \"SourceTransactionSystem\": \"<source system>\",\n  \"SourceTransactionNumber\": \"EXT-1001\",\n  \"SourceTransactionId\": \"EXT-1001\",\n  \"SourceTransactionRevisionNumber\": 1,\n  \"BusinessUnitId\": 300000012345678,\n  \"BuyingPartyNumber\": \"<customer number>\",\n  \"TransactionalCurrencyCode\": \"USD\",\n  \"TransactionOn\": \"2026-10-29T10:00:00+00:00\",\n  \"SubmittedFlag\": false\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-scm-items-v2",
+     "name": "Items Version 2 (itemsV2)",
+     "kind": "rest",
+     "summary": "Create, query and update product master items with categories, revisions, supplier associations and EFFs.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/itemsV2",
+     "children": [
+      "Item Revisions",
+      "Item-Category Assignments",
+      "Item-Supplier Associations",
+      "Item Attachments",
+      "Item Translatable Attributes",
+      "Product Costs",
+      "Extensible Flexfields for Items"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/25c/fasrp/api-product-lifecycle-management-items-version-2.html",
+     "verified": true,
+     "notes": "Collection GET/POST, item GET/PATCH on {itemsV2UniqID}; no DELETE - use actions addItemsToDeleteGroup / addSupplierAssociationsToDeleteGroup. Children: Item Revisions, Item-Category Assignments, Item-Supplier Associations, Item Attachments, Translatable Attributes, Product Costs, DFF/EFF/GDF.",
+     "examples": []
+    },
+    {
+     "id": "erp-ppm-projects",
+     "name": "Projects (Project Management)",
+     "kind": "rest",
+     "summary": "Create projects from a template or from scratch, with tasks, team members, classifications and customers.",
+     "method": "GET, POST, PATCH",
+     "path": "/fscmRestApi/resources/11.13.18.05/projects",
+     "children": [
+      "Tasks",
+      "TaskDependencies",
+      "ProjectTeamMembers",
+      "ProjectClassifications",
+      "ProjectCustomers",
+      "ProjectTransactionControls",
+      "ProviderBusinessUnits",
+      "ProjectDFF",
+      "Attachments"
+     ],
+     "keyFields": [
+      "ProjectId",
+      "ProjectName",
+      "ProjectNumber",
+      "OwningOrganizationName",
+      "SourceTemplateName",
+      "LegalEntityName",
+      "ProjectStartDate",
+      "ProjectCurrencyCode",
+      "ProjectManagerEmail"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/project-management/26b/fapap/op-projects-post.html",
+     "verified": true,
+     "notes": "Required: ProjectName and OwningOrganizationName; ProjectStartDate and ProjectCurrencyCode are non-nullable - send them. Create from a template with SourceTemplateId or SourceTemplateName. IntegrationApplicationCode / IntegrationProjectReference cannot be set on POST. Upsert-Mode header supported.",
+     "examples": [
+      {
+       "title": "Create from a template",
+       "lang": "json",
+       "code": "{\n  \"ProjectName\": \"Example Implementation\",\n  \"ProjectNumber\": \"PRJ-1001\",\n  \"SourceTemplateName\": \"<template name>\",\n  \"OwningOrganizationName\": \"<project organization>\",\n  \"LegalEntityName\": \"<legal entity>\",\n  \"ProjectStartDate\": \"2026-11-01\",\n  \"ProjectCurrencyCode\": \"USD\",\n  \"ProjectManagerEmail\": \"pm@example.com\"\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-scm-receipts",
+     "name": "Receiving receipts (Receipt Requests)",
+     "kind": "rest",
+     "summary": "Create PO receipts (receive, deliver) from a warehouse or supplier portal.",
+     "method": "POST",
+     "path": "/fscmRestApi/resources/11.13.18.05/receivingReceiptRequests",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/24c/fasrp/rest-endpoints.html",
+     "verified": false,
+     "notes": "UNVERIFIED: no receipts page was read in this session. The SCM REST book (fasrp) has a receiving receipt request resource; confirm its exact name (expected receivingReceiptRequests), required fields and processing mode on the SCM All REST Endpoints page before use.",
+     "examples": []
+    }
+   ]
+  },
+  {
+   "id": "erp-integrations",
+   "name": "ERP Integrations REST + SOAP",
+   "description": "erpintegrations REST operations, the ErpIntegrationService SOAP service and the BI Publisher report service used by OIC and custom clients.",
+   "items": [
+    {
+     "id": "erp-int-importbulkdata",
+     "name": "erpintegrations - importBulkData",
+     "kind": "rest",
+     "summary": "One call that uploads a base64 zip to UCM, runs Load Interface File for Import and then the import job, with optional callback and notification.",
+     "method": "POST",
+     "path": "/fscmRestApi/resources/11.13.18.05/erpintegrations",
+     "keyFields": [
+      "OperationName",
+      "DocumentContent",
+      "ContentType",
+      "FileName",
+      "DocumentAccount",
+      "JobName",
+      "ParameterList",
+      "CallbackURL",
+      "NotificationCode",
+      "JobOptions",
+      "ReqstId"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-post.html",
+     "verified": true,
+     "notes": "All operations share one resource; the body field OperationName selects the behaviour. Oracle examples send Content-Type: application/vnd.oracle.adf.resourceitem+json. JobName = '<job package>,<job definition>'. ParameterList uses #NULL for empty positions. NotificationCode: first digit 1=email, 2=bell, 3=both; second digit 0=any outcome, 1=success, 2=failure. CallbackURL '#NULL' when not used. Response returns ReqstId.",
+     "examples": [
+      {
+       "title": "Oracle example: Payables invoice import (DocumentContent shortened)",
+       "lang": "json",
+       "code": "{\n  \"OperationName\": \"importBulkData\",\n  \"DocumentContent\": \"<base64 of zip>\",\n  \"ContentType\": \"zip\",\n  \"FileName\": \"APTEST_0310.zip\",\n  \"DocumentAccount\": \"fin$/payables$/import$\",\n  \"JobName\": \"oracle/apps/ess/financials/payables/invoices/transactions,APXIIMPT\",\n  \"ParameterList\": \"#NULL,Vision Operations,#NULL,#NULL,#NULL,#NULL,#NULL,INVOICE GATEWAY,#NULL,#NULL,#NULL,1,#NULL\",\n  \"CallbackURL\": \"#NULL\",\n  \"NotificationCode\": \"10\",\n  \"JobOptions\": \"InterfaceDetails=1,ImportOption=Y ,PurgeOption = Y,ExtractFileType=ALL\"\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-int-uploadfiletoucm",
+     "name": "erpintegrations - uploadFileToUCM",
+     "kind": "rest",
+     "summary": "Upload a base64 file to a UCM account and get back a DocumentId for a later submitESSJobRequest.",
+     "method": "POST",
+     "path": "/fscmRestApi/resources/11.13.18.05/erpintegrations",
+     "keyFields": [
+      "OperationName",
+      "DocumentContent",
+      "DocumentAccount",
+      "ContentType",
+      "FileName",
+      "DocumentId"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-post.html",
+     "verified": true,
+     "notes": "All operations share one resource; the body field OperationName selects the behaviour. Oracle examples send Content-Type: application/vnd.oracle.adf.resourceitem+json. Use when you need separate control of load and import steps.",
+     "examples": [
+      {
+       "title": "Upload a zip",
+       "lang": "json",
+       "code": "{\n  \"OperationName\": \"uploadFileToUCM\",\n  \"DocumentContent\": \"<base64 of zip>\",\n  \"DocumentAccount\": \"fin$/payables$/import$\",\n  \"ContentType\": \"zip\",\n  \"FileName\": \"Test.zip\",\n  \"DocumentId\": null\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-int-submitessjobrequest",
+     "name": "erpintegrations - submitESSJobRequest",
+     "kind": "rest",
+     "summary": "Submit any ESS job by package and definition name with positional ESSParameters; returns ReqstId.",
+     "method": "POST",
+     "path": "/fscmRestApi/resources/11.13.18.05/erpintegrations",
+     "keyFields": [
+      "OperationName",
+      "JobPackageName",
+      "JobDefName",
+      "ESSParameters",
+      "ReqstId"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-post.html",
+     "verified": true,
+     "notes": "All operations share one resource; the body field OperationName selects the behaviour. Oracle examples send Content-Type: application/vnd.oracle.adf.resourceitem+json. Oracle example submits Load Interface File for Import (InterfaceLoaderController) with ESSParameters '1,10420,N,N' where 10420 is the DocumentId from uploadFileToUCM; the first value identifies the import process - confirm the value for your object.",
+     "examples": [
+      {
+       "title": "Load Interface File for Import",
+       "lang": "json",
+       "code": "{\n  \"OperationName\": \"submitESSJobRequest\",\n  \"JobPackageName\": \"oracle/apps/ess/financials/commonModules/shared/common/interfaceLoader\",\n  \"JobDefName\": \"InterfaceLoaderController\",\n  \"ESSParameters\": \"1,10420,N,N\"\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-int-exportbulkdata",
+     "name": "erpintegrations - exportBulkData",
+     "kind": "rest",
+     "summary": "Submit an ESS job and have its output and logs packaged to UCM for outbound integrations and reporting.",
+     "method": "POST",
+     "path": "/fscmRestApi/resources/11.13.18.05/erpintegrations",
+     "keyFields": [
+      "OperationName",
+      "JobName",
+      "ParameterList",
+      "CallbackURL",
+      "NotificationCode",
+      "JobOptions"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-post.html",
+     "verified": true,
+     "notes": "All operations share one resource; the body field OperationName selects the behaviour. Oracle examples send Content-Type: application/vnd.oracle.adf.resourceitem+json. Supports NotificationCode and CallbackURL like importBulkData. JobOptions 'ExtractFileType=ALL'.",
+     "examples": [
+      {
+       "title": "Oracle example (interface loader purge output)",
+       "lang": "json",
+       "code": "{\n  \"OperationName\": \"exportBulkData\",\n  \"JobName\": \"oracle/apps/ess/financials/commonModules/shared/common/interfaceLoader,InterfaceLoaderPurge\",\n  \"ParameterList\": \"1,27921,#NULL,#NULL,#NULL,ORA_FBDI,USER,#NULL,#NULL\",\n  \"CallbackURL\": \"#NULL\",\n  \"NotificationCode\": \"10\",\n  \"JobOptions\": \"ExtractFileType=ALL\"\n}"
+      }
+     ]
+    },
+    {
+     "id": "erp-int-getessjobstatus",
+     "name": "erpintegrations - getESSJobStatus (finder ESSJobStatusRF)",
+     "kind": "rest",
+     "summary": "Poll the status of a submitted ESS request id.",
+     "method": "GET",
+     "path": "/fscmRestApi/resources/11.13.18.05/erpintegrations?finder=ESSJobStatusRF;requestId={id}",
+     "keyFields": [
+      "ReqstId",
+      "RequestStatus"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-operationname-get.html",
+     "verified": true,
+     "notes": "GET with finder ESSJobStatusRF;requestId=<id>. Status is returned in items[0].RequestStatus (e.g. SUCCEEDED). Other terminal/running values are not listed on the page - treat anything not yet terminal as 'keep polling' and cap retries. For parent + child job statuses use ESSExecutionDetailsRF (returns a JSON string in RequestStatus).",
+     "examples": [
+      {
+       "title": "Poll status",
+       "lang": "bash",
+       "code": "curl -s -H \"Authorization: Bearer $TOKEN\" \\\n  \"https://{pod}.fa.{region}.oraclecloud.com/fscmRestApi/resources/11.13.18.05/erpintegrations?finder=ESSJobStatusRF;requestId=14557\" | jq -r '.items[0].RequestStatus'"
+      }
+     ]
+    },
+    {
+     "id": "erp-int-getessexecutiondetails",
+     "name": "erpintegrations - getESSExecutionDetails (finder ESSExecutionDetailsRF)",
+     "kind": "rest",
+     "summary": "Return job path, name, status and all child jobs (e.g. Transfer File, Load File to Interface) for a request id.",
+     "method": "GET",
+     "path": "/fscmRestApi/resources/11.13.18.05/erpintegrations?finder=ESSExecutionDetailsRF;requestId={id}",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-operationname-get.html",
+     "verified": true,
+     "notes": "RequestStatus holds a JSON string: {JOBS:{JOBNAME, JOBPATH, REQUESTID, STATUS, CHILD:[...]}} - parse it a second time. Use to find the child import request id when importBulkData spawns several jobs.",
+     "examples": [
+      {
+       "title": "Get child job details",
+       "lang": "http",
+       "code": "GET /fscmRestApi/resources/11.13.18.05/erpintegrations?finder=ESSExecutionDetailsRF;requestId=14557\nAuthorization: Bearer $TOKEN"
+      }
+     ]
+    },
+    {
+     "id": "erp-int-downloadessjobexecutiondetails",
+     "name": "erpintegrations - downloadESSJobExecutionDetails (finder ESSJobExecutionDetailsRF)",
+     "kind": "rest",
+     "summary": "Download the ESS log and output files of a request as a base64 zip.",
+     "method": "GET",
+     "path": "/fscmRestApi/resources/11.13.18.05/erpintegrations?finder=ESSJobExecutionDetailsRF;requestId={id},fileType=ALL",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-operationname-get.html",
+     "verified": true,
+     "notes": "fileType=ALL, LOG or OUT. Zip is in items[0].DocumentContent (base64). Download the import job's log to read rejection details.",
+     "examples": [
+      {
+       "title": "Download and unzip",
+       "lang": "bash",
+       "code": "curl -s -H \"Authorization: Bearer $TOKEN\" \\\n  \"https://{pod}.fa.{region}.oraclecloud.com/fscmRestApi/resources/11.13.18.05/erpintegrations?finder=ESSJobExecutionDetailsRF;requestId=14557,fileType=ALL\" \\\n  | jq -r '.items[0].DocumentContent' | base64 -d > ess_14557.zip && unzip -o ess_14557.zip -d ess_14557"
+      }
+     ]
+    },
+    {
+     "id": "erp-int-document-finders",
+     "name": "erpintegrations - UCM document finders",
+     "kind": "rest",
+     "summary": "Find UCM document ids by file prefix and account, or download one document by id.",
+     "method": "GET",
+     "path": "/fscmRestApi/resources/11.13.18.05/erpintegrations?finder=DocumentRF;docId={id}",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-operationname-get.html",
+     "verified": true,
+     "notes": "DocumentIdsByFilePrefixRF;filePrefix=..,docAccount=..,comment=.. (excludes docs whose comment starts with the given value; searches FAFusionImportExport accounts, or the Attachment group when docAccount is %23NULL). DocumentRF;docId=.. returns base64 DocumentContent. Note docAccount is URL-encoded (fin%2FgeneralLedger%2Fimport).",
+     "examples": [
+      {
+       "title": "Find GL files by prefix",
+       "lang": "http",
+       "code": "GET /fscmRestApi/resources/11.13.18.05/erpintegrations?finder=DocumentIdsByFilePrefixRF;filePrefix=GlInterface,docAccount=fin%2FgeneralLedger%2Fimport,comment=NotMyComment"
+      }
+     ]
+    },
+    {
+     "id": "erp-soap-erpintegrationservice",
+     "name": "ErpIntegrationService (SOAP)",
+     "kind": "soap",
+     "summary": "SOAP equivalent of erpintegrations: importBulkData, loadAndImportData, submitESSJobRequest, getESSJobStatus, downloadESSJobExecutionDetails, exportBulkData, uploadFileToUcm and more.",
+     "method": "POST",
+     "path": "/fscmService/ErpIntegrationService?WSDL",
+     "children": [
+      "getESSJobStatus",
+      "submitESSJobRequest",
+      "submitJobWithOutput",
+      "uploadFileToUcm",
+      "getDocumentForDocumentId",
+      "getDocumentIdsForFilePrefix",
+      "downloadESSJobExecutionDetails",
+      "loadAndImportData",
+      "importBulkData",
+      "exportBulkData",
+      "extractAndPurge",
+      "getESSExecutionDetails",
+      "appendFileComment",
+      "updateInterfaceData"
+     ],
+     "keyFields": [
+      "requestId",
+      "jobPackageName",
+      "jobDefinitionName",
+      "paramList",
+      "notificationCode",
+      "callbackURL"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/oeswf/erpintegrationservice-d16539e420.html",
+     "verified": true,
+     "notes": "QName {http://xmlns.oracle.com/apps/financials/commonModules/shared/model/erpIntegrationService/}ErpIntegrationService. loadAndImportData is described as deprecated in favour of importBulkData. submitESSJobRequest elements: jobPackageName, jobDefinitionName, paramList (#NULL for empty). getESSJobStatus element: requestId (long). Files must sit in a FAFusionImportExport UCM account or the Attachment group to be downloadable. The page has no sample envelope - generate one from the WSDL (the types namespace for request elements is in the WSDL).",
+     "examples": []
+    },
+    {
+     "id": "erp-soap-bip-runreport",
+     "name": "BI Publisher ExternalReportWSSService - runReport",
+     "kind": "soap",
+     "summary": "Run a BI Publisher report synchronously and receive the output as base64 in reportBytes.",
+     "method": "POST",
+     "path": "/xmlpserver/services/ExternalReportWSSService?wsdl",
+     "keyFields": [
+      "reportAbsolutePath",
+      "attributeFormat",
+      "parameterNameValues",
+      "sizeOfDataChunkDownload",
+      "reportBytes",
+      "reportContentType"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/integration-cloud/soap-adapter/call-oracle-fusion-applications-business-intelligence-publisher-report-services.html",
+     "verified": true,
+     "notes": "Protected service xmlpserver/services/ExternalReportWSSService?wsdl expects credentials in the SOAP header (WS-Security); the public v2 ReportService expects them in the body. Output is always base64 (no MTOM/attachments). Use only for short/small reports; for large output schedule the report (ScheduleReportWSSService) and deliver to UCM/FTP. ReportRequest fields: reportAbsolutePath (path to .xdo), attributeFormat (pdf, csv, excel, xml/data...), attributeTemplate, attributeLocale, parameterNameValues, sizeOfDataChunkDownload (-1 = return all), byPassCache. Response: reportBytes, reportContentType. Confirm the operation namespace from your pod's WSDL.",
+     "examples": []
+    }
+   ]
+  },
+  {
+   "id": "erp-fbdi",
+   "name": "FBDI templates & import jobs",
+   "description": "File-Based Data Import templates, interface tables, UCM accounts and the ESS jobs that load them.",
+   "items": [
+    {
+     "id": "erp-fbdi-ap-invoices",
+     "name": "Payables Standard Invoice Import (FBDI)",
+     "kind": "fbdi",
+     "summary": "Bulk-load Payables invoices into the open interface and create them with Import Payables Invoices.",
+     "path": "PayablesStandardInvoiceImportTemplate.xlsm",
+     "children": [
+      "AP_INVOICES_INTERFACE",
+      "AP_INVOICE_LINES_INTERFACE"
+     ],
+     "keyFields": [
+      "Import Payables Invoices",
+      "fin/payables/import"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/25d/oefbf/payablesstandardinvoiceimport-3179.html",
+     "verified": true,
+     "notes": "UCM account fin/payables/import (web service form: fin$/payables$/import$). Control files ApInvoicesInterface.ctl and ApInvoiceLinesInterface.ctl. Object owner FIN:Payables:Payables Standard Invoice. ESS job for Import Payables Invoices in Oracle's importBulkData example: oracle/apps/ess/financials/payables/invoices/transactions,APXIIMPT.",
+     "examples": []
+    },
+    {
+     "id": "erp-fbdi-journals",
+     "name": "Journal Import (FBDI)",
+     "kind": "fbdi",
+     "summary": "Load GL journals into GL_INTERFACE and create them with the Import Journals process.",
+     "path": "JournalImportTemplate.xlsm",
+     "children": [
+      "GL_INTERFACE"
+     ],
+     "keyFields": [
+      "Import Journals",
+      "fin/generalLedger/import"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/25d/oefbf/journalimport-3100.html",
+     "verified": true,
+     "notes": "UCM account fin/generalLedger/import (web service form fin$/generalLedger$/import$). Control file GlInterface.ctl. Object owner FIN:General Ledger:Journal. Scheduled process: Import Journals. FBDI journal import access can be segregated from Import Journals access (separate privileges).",
+     "examples": []
+    },
+    {
+     "id": "erp-fbdi-autoinvoice",
+     "name": "AutoInvoice Import (FBDI)",
+     "kind": "fbdi",
+     "summary": "Load Receivables invoices, credit memos and debit memos through the AutoInvoice interface.",
+     "path": "AutoInvoiceImportTemplate.xlsm",
+     "children": [
+      "RA_INTERFACE_LINES_ALL",
+      "RA_INTERFACE_DISTRIBUTIONS_ALL",
+      "RA_INTERFACE_SALESCREDITS_ALL",
+      "AR_INTERFACE_CONTS_ALL"
+     ],
+     "keyFields": [
+      "Import AutoInvoice",
+      "fin/autoInvoice/import"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/oefbf/autoinvoiceimport-3114.html",
+     "verified": true,
+     "notes": "UCM account fin/autoInvoice/import. Control files RaInterfaceLinesAll.ctl, RaInterfaceDistributionsAll.ctl, RaInterfaceSalesCreditsAll.ctl, ArInterfaceContsAll.ctl. Scheduled process: Import AutoInvoice.",
+     "examples": []
+    },
+    {
+     "id": "erp-fbdi-suppliers",
+     "name": "Import Suppliers (FBDI)",
+     "kind": "fbdi",
+     "summary": "Bulk-create or update supplier headers; addresses, sites, site assignments and contacts have their own import templates.",
+     "path": "SupplierImportTemplate.xlsm",
+     "children": [
+      "POZ_SUPPLIERS_INT"
+     ],
+     "keyFields": [
+      "Import Suppliers",
+      "prc/supplier/import"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/procurement/25c/oefbp/importsuppliers-3190.html",
+     "verified": true,
+     "notes": "UCM account prc/supplier/import. Control file PozSuppliersInt.ctl. Object owner Procurement:Supplier Model:Supplier. Scheduled process Import Suppliers. Load order: suppliers, then addresses, sites, site assignments, contacts (separate FBDI entries such as Import Supplier Sites; POZ_SUPPLIER_SITES_INT exists in Tables and Views).",
+     "examples": []
+    },
+    {
+     "id": "erp-fbdi-fa-mass-additions",
+     "name": "Fixed Asset Mass Additions Import (FBDI)",
+     "kind": "fbdi",
+     "summary": "Load new assets into the mass additions interface and create them with Post Mass Additions.",
+     "path": "Fixed Asset Mass Additions Import (template from FBDI guide)",
+     "children": [
+      "FA_MASS_ADDITIONS",
+      "FA_MASSADD_DISTRIBUTIONS",
+      "FA_MC_MASS_RATES"
+     ],
+     "keyFields": [
+      "Post Mass Additions"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/25d/faalm/how-fixed-asset-mass-additions-import-data-is-processed.html",
+     "verified": true,
+     "notes": "Template tabs/interface tables: FA_MASS_ADDITIONS (cost, units, book), FA_MASSADD_DISTRIBUTIONS (units, location, employee), FA_MC_MASS_RATES (reporting currency, optional). After load: Assets > Additions infotile > Ready to Post > Post All. Fix errors via Exceptions > Prepare All, correct, set queue to Post, Submit and Post Mass Additions. Template file name and UCM account were not shown on the page read - take them from the FBDI guide entry 'Fixed Asset Mass Additions Import'.",
+     "examples": []
+    },
+    {
+     "id": "erp-ess-load-interface-file",
+     "name": "Load Interface File for Import (InterfaceLoaderController)",
+     "kind": "ess",
+     "summary": "Generic ESS job that transfers an uploaded FBDI zip from UCM and loads it into the interface tables (child jobs Transfer File, Load File to Interface).",
+     "path": "oracle/apps/ess/financials/commonModules/shared/common/interfaceLoader,InterfaceLoaderController",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-operationname-get.html",
+     "verified": true,
+     "notes": "Package oracle/apps/ess/financials/commonModules/shared/common/interfaceLoader, definition InterfaceLoaderController. Oracle example ESSParameters '1,10420,N,N' (10420 = UCM DocumentId). After it succeeds, submit the product import job (Import Payables Invoices, Import Journals, Import AutoInvoice...). importBulkData runs both for you.",
+     "examples": []
+    },
+    {
+     "id": "erp-ess-interface-loader-purge",
+     "name": "Purge interface tables (InterfaceLoaderPurge)",
+     "kind": "ess",
+     "summary": "Purge FBDI interface and error rows for a load request so a corrected file can be reloaded cleanly.",
+     "path": "oracle/apps/ess/financials/commonModules/shared/common/interfaceLoader,InterfaceLoaderPurge",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-post.html",
+     "verified": true,
+     "notes": "Oracle example: submitESSJobRequest with JobDefName InterfaceLoaderPurge and ESSParameters '59,XXXXX,,,Y,ORA_FBDI' (returns 204). exportBulkData can run the purge and return its output. Confirm parameter positions for your object in the purge job help before production use.",
+     "examples": [
+      {
+       "title": "Oracle example purge request",
+       "lang": "json",
+       "code": "{\n  \"OperationName\": \"submitESSJobRequest\",\n  \"JobPackageName\": \"oracle/apps/ess/financials/commonModules/shared/common/interfaceLoader\",\n  \"JobDefName\": \"InterfaceLoaderPurge\",\n  \"ESSParameters\": \"59,XXXXX,,,Y,ORA_FBDI\"\n}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "erp-bip-sql",
+   "name": "BIP & SQL",
+   "description": "Tables useful in BI Publisher data models for monitoring imports.",
+   "items": [
+    {
+     "id": "erp-sql-gl-interface",
+     "name": "GL_INTERFACE (Journal Import interface table)",
+     "kind": "sql",
+     "summary": "Staging table read by Import Journals; query it in a BIP data model to monitor stuck or errored journal rows.",
+     "path": "GL_INTERFACE",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/25d/oefbf/journalimport-3100.html",
+     "verified": true,
+     "notes": "Table named on the Journal Import FBDI page with a link to its Tables and Views entry. Column names were not read in this session - check the GL_INTERFACE page in Tables and Views for Financials before writing SQL.",
+     "examples": []
+    },
+    {
+     "id": "erp-sql-ap-invoices-interface",
+     "name": "AP_INVOICES_INTERFACE / AP_INVOICE_LINES_INTERFACE",
+     "kind": "sql",
+     "summary": "Payables invoice interface tables filled by FBDI and read by Import Payables Invoices.",
+     "path": "AP_INVOICES_INTERFACE",
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/25d/oefbf/payablesstandardinvoiceimport-3179.html",
+     "verified": true,
+     "notes": "Interface table names confirmed on the FBDI page; column names not read in this session - check Tables and Views for Financials.",
+     "examples": []
+    },
+    {
+     "id": "erp-sql-ap-invoices-all",
+     "name": "AP_INVOICES_ALL (Payables invoice headers)",
+     "kind": "sql",
+     "summary": "One row per Payables invoice; base table for BIP reports on open, paid and cancelled invoices.",
+     "path": "AP_INVOICES_ALL",
+     "keyFields": [
+      "INVOICE_ID",
+      "INVOICE_NUM",
+      "VENDOR_ID",
+      "VENDOR_SITE_ID",
+      "ORG_ID",
+      "INVOICE_AMOUNT",
+      "AMOUNT_PAID",
+      "PAYMENT_STATUS_FLAG",
+      "WFAPPROVAL_STATUS",
+      "SOURCE",
+      "GL_DATE"
+     ],
+     "docUrl": "https://docs.oracle.com/en/cloud/saas/financials/25d/oedmf/apinvoicesall-26582.html",
+     "verified": true,
+     "notes": "PK AP_INVOICES_ALL_PK on INVOICE_ID. PAYMENT_STATUS_FLAG Y/N/P, WFAPPROVAL_STATUS (approval workflow), CANCELLED_DATE, SOURCE (feeder system), GL_DATE. FKs: VENDOR_ID -> POZ_SUPPLIERS, SET_OF_BOOKS_ID -> GL_LEDGERS, PO_HEADER_ID -> PO_HEADERS_ALL, PROJECT_ID -> PJF_PROJECTS_ALL_B, ACCTS_PAY_CODE_COMBINATION_ID -> GL_CODE_COMBINATIONS. The doc lists no FK from ORG_ID to a BU table - verify your BU join. Data security is not applied to raw SQL in BIP: filter by ORG_ID yourself.",
+     "examples": [
+      {
+       "title": "Open (unpaid / partly paid) invoices for a BU and source",
+       "lang": "sql",
+       "code": "SELECT aia.invoice_id,\n       aia.invoice_num,\n       aia.vendor_id,\n       aia.invoice_date,\n       aia.gl_date,\n       aia.invoice_currency_code,\n       aia.invoice_amount,\n       NVL(aia.amount_paid, 0) AS amount_paid,\n       aia.wfapproval_status\nFROM   ap_invoices_all aia\nWHERE  aia.org_id = :p_org_id\nAND    aia.payment_status_flag IN ('N', 'P')\nAND    aia.cancelled_date IS NULL\nAND    (:p_source IS NULL OR aia.source = :p_source)\nORDER  BY aia.gl_date"
+      }
+     ]
+    },
+    {
+     "id": "erp-bip-schedule-and-public-services",
+     "name": "BI Publisher ScheduleReportWSSService and public v2 services",
+     "kind": "bip",
+     "summary": "Asynchronous/scheduled BIP execution and document retrieval for large reports, plus the public (credentials-in-body) variants.",
+     "method": "POST",
+     "path": "/xmlpserver/services/ScheduleReportWSSService?wsdl",
+     "docUrl": "https://docs.oracle.com/en/cloud/paas/integration-cloud/soap-adapter/call-oracle-fusion-applications-business-intelligence-publisher-report-services.html",
+     "verified": true,
+     "notes": "Protected (credentials in SOAP header): xmlpserver/services/ExternalReportWSSService?wsdl (runReport), xmlpserver/services/ScheduleReportWSSService?wsdl (getDocumentData). Public (credentials in body): xmlpserver/services/v2/ReportService?wsdl, xmlpserver/services/v2/ScheduleService?wsdl. Oracle recommends synchronous runReport only for short/small reports; use UCM- or FTP-based asynchronous patterns for big output.",
+     "examples": []
+    }
+   ]
+  }
+ ],
+ "cookbook": [
+  {
+   "id": "erp-ap-invoice-oic-fbdi-callback",
+   "title": "AP invoice import via OIC + FBDI + callback",
+   "module": "Payables",
+   "level": "advanced",
+   "problem": "Invoices arrive from an external system (OCR, portal, legacy) and must be created in Payables in bulk with status feedback, not one REST call per invoice.",
+   "prerequisites": [
+    "Integration user with Payables invoice import and FBDI/UCM upload access in a test pod",
+    "PayablesStandardInvoiceImportTemplate.xlsm for your release (column order must match the control files)",
+    "OIC connection to Fusion (ERP Cloud adapter or REST adapter with basic/OAuth)",
+    "Business unit, invoice source (e.g. an import source defined in Payables) and supplier/site already exist"
+   ],
+   "steps": [
+    "Map source data to the two template sheets (header -> AP_INVOICES_INTERFACE, lines -> AP_INVOICE_LINES_INTERFACE). Use the template's generate-CSV macro once to learn the exact CSV file names and column order, then produce the same CSVs from OIC.",
+    "Zip the CSVs and base64-encode the zip (in OIC: stage file write + zip + encode, or use the ERP Cloud adapter's bulk import action which builds the request for you).",
+    "Call POST /fscmRestApi/resources/11.13.18.05/erpintegrations with OperationName importBulkData, DocumentAccount fin$/payables$/import$, JobName oracle/apps/ess/financials/payables/invoices/transactions,APXIIMPT and a ParameterList that matches the Import Payables Invoices parameters (Oracle's example passes the BU name and source).",
+    "Set CallbackURL to an OIC/your endpoint that receives job completion (or #NULL and poll), and NotificationCode (e.g. 30 = email+bell on any outcome) so support users see the result.",
+    "Store the returned ReqstId with your batch id for correlation.",
+    "On callback (or polling getESSJobStatus until terminal), call getESSExecutionDetails to find the import child job, then downloadESSJobExecutionDetails (fileType=ALL) to read the import report / rejections.",
+    "Write back status per invoice to the source system; send rejected rows for correction."
+   ],
+   "examples": [
+    {
+     "title": "importBulkData request",
+     "lang": "json",
+     "code": "{\n  \"OperationName\": \"importBulkData\",\n  \"DocumentContent\": \"<base64 zip>\",\n  \"ContentType\": \"zip\",\n  \"FileName\": \"ApInvoices_20261029.zip\",\n  \"DocumentAccount\": \"fin$/payables$/import$\",\n  \"JobName\": \"oracle/apps/ess/financials/payables/invoices/transactions,APXIIMPT\",\n  \"ParameterList\": \"#NULL,<BU name>,#NULL,#NULL,#NULL,#NULL,#NULL,<Invoice source>,#NULL,#NULL,#NULL,1,#NULL\",\n  \"CallbackURL\": \"https://<oic-host>/ic/api/integration/v1/flows/rest/<callback-flow>/1.0/status\",\n  \"NotificationCode\": \"30\",\n  \"JobOptions\": \"InterfaceDetails=1,ImportOption=Y ,PurgeOption = Y,ExtractFileType=ALL\"\n}"
+    },
+    {
+     "title": "Poll and fetch log",
+     "lang": "bash",
+     "code": "REQ=14258\ncurl -s -H \"Authorization: Bearer $TOKEN\" \"https://{pod}.fa.{region}.oraclecloud.com/fscmRestApi/resources/11.13.18.05/erpintegrations?finder=ESSJobStatusRF;requestId=$REQ\" | jq -r '.items[0].RequestStatus'\ncurl -s -H \"Authorization: Bearer $TOKEN\" \"https://{pod}.fa.{region}.oraclecloud.com/fscmRestApi/resources/11.13.18.05/erpintegrations?finder=ESSJobExecutionDetailsRF;requestId=$REQ,fileType=ALL\" | jq -r '.items[0].DocumentContent' | base64 -d > ap_$REQ.zip"
+    }
+   ],
+   "testing": [
+    "Run with 2-3 invoices in a test pod; confirm ReqstId returned and the job tree (Load Interface File for Import -> Import Payables Invoices) succeeds in Scheduled Processes.",
+    "Query GET /invoices?q=InvoiceNumber='<num>' to confirm creation; check the import report in the downloaded zip for rejections.",
+    "Send one deliberately bad row (unknown supplier) and confirm it is reported as rejected and your callback handling marks it failed."
+   ],
+   "rollback": [
+    "Invoices created in error: cancel them (Invoices action cancelInvoice or UI) - do not delete validated/accounted invoices.",
+    "Rejected interface rows: purge them (InterfaceLoaderPurge or the import's purge option) before reloading the corrected file.",
+    "Disable the OIC schedule/endpoint to stop new loads."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/saas/financials/25d/oefbf/payablesstandardinvoiceimport-3179.html",
+    "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-post.html",
+    "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-operationname-get.html"
+   ]
+  },
+  {
+   "id": "erp-supplier-site-rest",
+   "title": "Create supplier, address and site via REST",
+   "module": "Procurement",
+   "level": "intermediate",
+   "problem": "A supplier onboarding portal must create an approved supplier with a purchasing + pay site without manual data entry.",
+   "prerequisites": [
+    "User with supplier create/update privileges (Supplier Administrator-type role) in a test pod",
+    "Valid lookup codes: POZ_VENDOR_TYPE, POZ_ORGANIZATION_TYPE, ORA_POZ_BUSINESS_RELATIONSHIP",
+    "Procurement BU id (ProcurementBUId)"
+   ],
+   "steps": [
+    "POST /suppliers with Supplier name, TaxOrganizationTypeCode, BusinessRelationshipCode and SupplierTypeCode; read SupplierId from the response.",
+    "POST /suppliers/{SupplierId}/child/addresses with address lines, Country/CountryCode and purpose flags; read SupplierAddressId.",
+    "POST /suppliers/{SupplierId}/child/sites with SupplierSite, ProcurementBUId, SupplierAddressId and SitePurposePurchasingFlag / SitePurposePayFlag = true.",
+    "Add client BU access through the site's assignments child (check the Site Assignments page for the required fields) so invoices can be entered in the BU.",
+    "Optionally POST contacts (/child/contacts) and attachments (bank letters, tax forms)."
+   ],
+   "examples": [
+    {
+     "title": "1. Supplier",
+     "lang": "http",
+     "code": "POST /fscmRestApi/resources/11.13.18.05/suppliers\nContent-Type: application/json\n\n{\n  \"Supplier\": \"Example Supplies Ltd\",\n  \"TaxOrganizationTypeCode\": \"<code>\",\n  \"BusinessRelationshipCode\": \"<code>\",\n  \"SupplierTypeCode\": \"<code>\"\n}"
+    },
+    {
+     "title": "2. Address",
+     "lang": "http",
+     "code": "POST /fscmRestApi/resources/11.13.18.05/suppliers/300000012345678/child/addresses\nContent-Type: application/json\n\n{\n  \"AddressName\": \"HQ\",\n  \"Country\": \"United States\",\n  \"AddressLine1\": \"Example Road\",\n  \"City\": \"Redwood City\",\n  \"State\": \"CA\",\n  \"PostalCode\": \"94065\",\n  \"AddressPurposeOrderingFlag\": true,\n  \"AddressPurposeRemitToFlag\": true\n}"
+    },
+    {
+     "title": "3. Site",
+     "lang": "http",
+     "code": "POST /fscmRestApi/resources/11.13.18.05/suppliers/300000012345678/child/sites\nContent-Type: application/json\n\n{\n  \"SupplierSite\": \"EXAMPLE-HQ\",\n  \"ProcurementBUId\": 300000012345600,\n  \"SupplierAddressId\": 300000012345679,\n  \"SitePurposePurchasingFlag\": true,\n  \"SitePurposePayFlag\": true\n}"
+    }
+   ],
+   "testing": [
+    "GET /suppliers/{SupplierId}?expand=addresses,sites and confirm ids and flags.",
+    "Open the supplier in the Manage Suppliers UI and check the site and BU assignment.",
+    "Create a test PO or invoice against the new site in the test pod."
+   ],
+   "rollback": [
+    "Suppliers have no DELETE endpoint: PATCH InactiveDate on the site and supplier to inactivate.",
+    "Remove the site assignment / set the site inactive before any transactions reference it."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/api-suppliers.html",
+    "https://docs.oracle.com/en/cloud/saas/procurement/26c/fapra/op-suppliers-post.html",
+    "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/op-suppliers-supplierid-child-addresses-post.html",
+    "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/op-suppliers-supplierid-child-sites-post.html"
+   ]
+  },
+  {
+   "id": "erp-bip-runreport-soap",
+   "title": "Run a BIP report via SOAP runReport and decode base64",
+   "module": "Reporting",
+   "level": "intermediate",
+   "problem": "An integration needs data that has no REST resource (e.g. custom SQL over AP/GL tables), returned on demand.",
+   "prerequisites": [
+    "A BIP report (.xdo) in the catalog with a CSV or XML output and a data model with bind parameters",
+    "Integration user allowed to run the report",
+    "SOAP client or OIC SOAP adapter using the protected ExternalReportWSSService WSDL"
+   ],
+   "steps": [
+    "Download https://{pod}.fa.{region}.oraclecloud.com/xmlpserver/services/ExternalReportWSSService?wsdl and confirm the operation namespace and security policy.",
+    "Build runReport with reportRequest: reportAbsolutePath (e.g. /Custom/Integrations/AP_Open_Invoices.xdo), attributeFormat (csv or xml), sizeOfDataChunkDownload -1, and parameterNameValues for each bind parameter.",
+    "Send credentials in the WS-Security header (protected service). The public v2 ReportService puts them in the body instead.",
+    "Read reportBytes (base64) from the response and decode it; reportContentType tells you the format.",
+    "In OIC, use decodeBase64ToReference and a stage-file read to parse CSV rows; for large reports switch to a scheduled report delivered to UCM."
+   ],
+   "examples": [
+    {
+     "title": "runReport envelope (confirm namespace from your WSDL)",
+     "lang": "xml",
+     "code": "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:pub=\"http://xmlns.oracle.com/oxp/service/PublicReportService\">\n  <soap:Header/>\n  <soap:Body>\n    <pub:runReport>\n      <pub:reportRequest>\n        <pub:attributeFormat>csv</pub:attributeFormat>\n        <pub:parameterNameValues>\n          <pub:item>\n            <pub:name>P_BU_NAME</pub:name>\n            <pub:values><pub:item>US1 Business Unit</pub:item></pub:values>\n          </pub:item>\n        </pub:parameterNameValues>\n        <pub:reportAbsolutePath>/Custom/Integrations/AP_Open_Invoices.xdo</pub:reportAbsolutePath>\n        <pub:sizeOfDataChunkDownload>-1</pub:sizeOfDataChunkDownload>\n      </pub:reportRequest>\n    </pub:runReport>\n  </soap:Body>\n</soap:Envelope>"
+    },
+    {
+     "title": "Decode reportBytes",
+     "lang": "bash",
+     "code": "xmllint --xpath \"string(//*[local-name()='reportBytes'])\" response.xml | base64 -d > report.csv"
+    }
+   ],
+   "testing": [
+    "Run the report in the BIP UI with the same parameters and compare row counts with the decoded file.",
+    "Test with a parameter that returns no rows and confirm your client handles an empty file.",
+    "Check response time stays well inside the synchronous limit; otherwise move to the scheduled pattern."
+   ],
+   "rollback": [
+    "Read-only call - nothing to undo in Fusion. Revert the catalog report to its previous version if a data model change broke consumers."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/paas/integration-cloud/soap-adapter/call-oracle-fusion-applications-business-intelligence-publisher-report-services.html",
+    "https://docs.oracle.com/cd/E23943_01/bi.1111/e22259/datatypes.htm"
+   ]
+  },
+  {
+   "id": "erp-ess-poll-download-log",
+   "title": "Poll an ESS job and download its log",
+   "module": "Integration",
+   "level": "starter",
+   "problem": "After submitting an import or any scheduled process you need a reliable wait loop and the log/output for troubleshooting.",
+   "prerequisites": [
+    "ESS request id (ReqstId) from importBulkData / submitESSJobRequest",
+    "Token or basic credentials for a user who can view the job"
+   ],
+   "steps": [
+    "GET erpintegrations?finder=ESSJobStatusRF;requestId=<id> every 30-60 s with a maximum attempt count.",
+    "Stop when RequestStatus is terminal (SUCCEEDED, or an error/warning/cancelled status). Values other than SUCCEEDED are not listed on the doc page - log any unknown value and stop after the cap.",
+    "If the job spawned children, GET ESSExecutionDetailsRF and parse the JSON string in RequestStatus to find each child REQUESTID and STATUS.",
+    "GET ESSJobExecutionDetailsRF;requestId=<child id>,fileType=ALL, base64-decode DocumentContent and unzip the log and output.",
+    "Attach the log to the incident / OIC tracking record."
+   ],
+   "examples": [
+    {
+     "title": "Bash poll loop",
+     "lang": "bash",
+     "code": "REQ=$1; BASE=\"https://{pod}.fa.{region}.oraclecloud.com/fscmRestApi/resources/11.13.18.05/erpintegrations\"\nfor i in $(seq 1 40); do\n  S=$(curl -s -H \"Authorization: Bearer $TOKEN\" \"$BASE?finder=ESSJobStatusRF;requestId=$REQ\" | jq -r '.items[0].RequestStatus')\n  echo \"attempt $i: $S\"\n  case \"$S\" in SUCCEEDED|ERROR|WARNING|CANCELLED) break;; esac\n  sleep 30\ndone\ncurl -s -H \"Authorization: Bearer $TOKEN\" \"$BASE?finder=ESSJobExecutionDetailsRF;requestId=$REQ,fileType=ALL\" | jq -r '.items[0].DocumentContent' | base64 -d > ess_$REQ.zip\nunzip -o ess_$REQ.zip -d ess_$REQ"
+    }
+   ],
+   "testing": [
+    "Submit a small job, confirm the loop ends on SUCCEEDED and the zip contains .log/.out files.",
+    "Pass a non-existent request id and confirm the script stops at the attempt cap without hanging."
+   ],
+   "rollback": [
+    "Read-only. If a job is stuck, cancel it from Scheduled Processes rather than resubmitting in a loop."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-operationname-get.html",
+    "https://docs.oracle.com/en/cloud/saas/financials/26b/oeswf/erpintegrationservice-d16539e420.html"
+   ]
+  },
+  {
+   "id": "erp-gl-journal-fbdi",
+   "title": "GL journal import via FBDI",
+   "module": "General Ledger",
+   "level": "intermediate",
+   "problem": "Journals from a sub-ledger, payroll or bank system must be posted to GL in bulk; the journalBatches REST resource cannot create journals.",
+   "prerequisites": [
+    "JournalImportTemplate.xlsm for your release",
+    "Ledger, journal source and category defined",
+    "User with FBDI journal import access (can be segregated from Import Journals access)"
+   ],
+   "steps": [
+    "Fill the GL_INTERFACE sheet (ledger, accounting date, source, category, currency, account segments, debit/credit). Keep column order; generate the CSV/zip with the template macro.",
+    "Upload the zip: erpintegrations uploadFileToUCM with DocumentAccount fin$/generalLedger$/import$; read DocumentId.",
+    "Submit Load Interface File for Import (InterfaceLoaderController) with the journal import process value and DocumentId in ESSParameters; poll to SUCCEEDED.",
+    "Run Import Journals for the ledger and source (Scheduled Processes, or submitESSJobRequest after confirming its job package/definition and parameters in your pod). Alternatively use importBulkData with the Import Journals job name.",
+    "Download the Import Journals output to confirm the batch name and any errors; post the batch (manually or AutoPost)."
+   ],
+   "examples": [
+    {
+     "title": "Upload to the GL import account",
+     "lang": "json",
+     "code": "{\n  \"OperationName\": \"uploadFileToUCM\",\n  \"DocumentContent\": \"<base64 zip>\",\n  \"DocumentAccount\": \"fin$/generalLedger$/import$\",\n  \"ContentType\": \"zip\",\n  \"FileName\": \"GlInterface_20261029.zip\",\n  \"DocumentId\": null\n}"
+    },
+    {
+     "title": "Load to GL_INTERFACE (first value = import process for journals, confirm in your pod)",
+     "lang": "json",
+     "code": "{\n  \"OperationName\": \"submitESSJobRequest\",\n  \"JobPackageName\": \"oracle/apps/ess/financials/commonModules/shared/common/interfaceLoader\",\n  \"JobDefName\": \"InterfaceLoaderController\",\n  \"ESSParameters\": \"<import process id>,<DocumentId>,N,N\"\n}"
+    }
+   ],
+   "testing": [
+    "Load one balanced 2-line journal; confirm Import Journals succeeded and the batch is visible (GET /journalBatches?q=... or Manage Journals).",
+    "Load an unbalanced journal in test and confirm it is reported as an error and stays out of GL.",
+    "Reconcile control totals (sum of debits/credits per file) with the imported batch."
+   ],
+   "rollback": [
+    "Unposted batch: delete it (journalBatches DELETE or UI).",
+    "Posted batch: reverse it (set reversal attributes via journalBatches PATCH or reverse in the UI) - never delete posted journals.",
+    "Purge leftover GL_INTERFACE rows for the load before reloading."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/saas/financials/25d/oefbf/journalimport-3100.html",
+    "https://docs.oracle.com/en/cloud/saas/financials/26b/farfa/op-erpintegrations-post.html",
+    "https://docs.oracle.com/en/cloud/saas/financials/26c/farfa/api-journal-batches.html"
+   ]
+  },
+  {
+   "id": "erp-requisition-rest",
+   "title": "Create a purchase requisition via REST",
+   "module": "Procurement",
+   "level": "starter",
+   "problem": "A self-service portal or chatbot must raise requisitions in Fusion and send them into the normal approval flow.",
+   "prerequisites": [
+    "Preparer is a valid user/worker with requisition privileges in the requisitioning BU",
+    "Category, UOM, deliver-to location and currency values valid in the BU"
+   ],
+   "steps": [
+    "POST /purchaseRequisitions with RequisitioningBU (or RequisitioningBUId), PreparerEmail (or PreparerId), Description and a lines array.",
+    "Each line: LineNumber, ItemDescription or Item, CategoryName, Quantity, UOM, Price, CurrencyCode, DestinationTypeCode, DeliverToLocationCode, RequesterEmail, RequestedDeliveryDate.",
+    "Let charge accounts default, or add distributions under the line (confirm distribution attributes on the Distributions page).",
+    "Read the requisition from the response (or GET the collection) to get purchaseRequisitionsUniqID - it is a hash key, never build it.",
+    "POST /purchaseRequisitions/{purchaseRequisitionsUniqID}/action/submitRequisition with Content-Type application/vnd.oracle.adf.action+json (optional requestFundsOverrideFlag / approverCheckoutFlowFlag); expect result SUCCESS or FAILURE.",
+    "Return the requisition number to the portal and poll GET for the approval status. Note: approvals are bypassed when the requisition is externally managed or carries approver details."
+   ],
+   "examples": [
+    {
+     "title": "Create header + line",
+     "lang": "json",
+     "code": "{\n  \"RequisitioningBU\": \"<BU name>\",\n  \"PreparerEmail\": \"preparer@example.com\",\n  \"Description\": \"Laptops for new joiners\",\n  \"lines\": [\n    {\n      \"LineNumber\": 1,\n      \"ItemDescription\": \"Laptop 14 inch\",\n      \"CategoryName\": \"<category>\",\n      \"Quantity\": 2,\n      \"UOM\": \"Each\",\n      \"Price\": 900,\n      \"CurrencyCode\": \"USD\",\n      \"DestinationTypeCode\": \"EXPENSE\",\n      \"DeliverToLocationCode\": \"<location>\",\n      \"RequesterEmail\": \"requester@example.com\",\n      \"RequestedDeliveryDate\": \"2026-11-15\"\n    }\n  ]\n}"
+    },
+    {
+     "title": "Submit for approval",
+     "lang": "http",
+     "code": "POST /fscmRestApi/resources/11.13.18.05/purchaseRequisitions/{purchaseRequisitionsUniqID}/action/submitRequisition\nContent-Type: application/vnd.oracle.adf.action+json\n\n{\n  \"requestFundsOverrideFlag\": false\n}\n\nHTTP/1.1 200\n{ \"result\": \"SUCCESS\" }"
+    }
+   ],
+   "testing": [
+    "GET the requisition and confirm lines, defaulted charge account and status after submit.",
+    "Check Manage Requisitions UI and the approver's worklist.",
+    "Negative test: invalid category or location returns a 400 with a readable message your portal shows."
+   ],
+   "rollback": [
+    "Before approval: withdraw and delete the draft (DELETE on the header if still incomplete) or cancel in the UI.",
+    "After approval / PO creation: cancel the requisition line or PO through standard procurement actions."
+   ],
+   "docUrls": [
+    "https://docs.oracle.com/en/cloud/saas/procurement/26b/fapra/op-purchaserequisitions-post.html",
+    "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/op-purchaserequisitions-purchaserequisitionsuniqid-action-submitrequisition-post.html"
+   ]
+  }
+ ]
+}
